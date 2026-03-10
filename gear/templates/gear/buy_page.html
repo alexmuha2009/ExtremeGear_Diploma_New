@@ -1,0 +1,49 @@
+{% extends "gear/base.html" %}
+
+{% block title %}Оформлення замовлення{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 50px auto; padding: 0 20px;">
+    
+    <div style="background: white; padding: 40px; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
+        <h2 style="text-align: center; margin-bottom: 30px; font-weight: 800; text-transform: uppercase;">🚀 Оформлення</h2>
+        
+        <div style="display: flex; gap: 20px; align-items: center; background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 30px;">
+            {% if gear.image %}
+                <img src="{{ gear.image.url }}" style="width: 80px; height: 80px; object-fit: contain;">
+            {% endif %}
+            <div>
+                <h4 style="margin: 0; font-weight: 700;">{{ gear.name }}</h4>
+                <div style="color: #ff4500; font-weight: 900; font-size: 1.2rem;">{{ gear.price }} ₴</div>
+            </div>
+        </div>
+
+        <form method="POST">
+            {% csrf_token %}
+            
+            <div class="mb-3">
+                <label class="fw-bold">Ваше ім'я</label>
+                <input type="text" name="name" class="form-control p-3" placeholder="Іван" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="fw-bold">Телефон</label>
+                <input type="text" name="phone" class="form-control p-3" placeholder="+380..." required>
+            </div>
+            
+             <div class="mb-3">
+                <label class="fw-bold">Email (необов'язково)</label>
+                <input type="email" name="email" class="form-control p-3" placeholder="mail@gmail.com">
+            </div>
+
+            <button type="submit" class="btn w-100 py-3 fw-bold text-white text-uppercase" style="background-color: #ff4500; border: none; font-size: 1.1rem; margin-top: 20px;">
+                Підтвердити замовлення
+            </button>
+            
+            <a href="{% url 'gear_detail' gear.id %}" class="btn w-100 py-3 fw-bold text-uppercase" style="background-color: #eee; color: #333; border: none; margin-top: 10px; display: block; text-align: center; text-decoration: none;">
+                Скасувати
+            </a>
+        </form>
+    </div>
+</div>
+{% endblock %}

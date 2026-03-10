@@ -1,0 +1,295 @@
+{% extends 'gear/base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .page-bg-fixed {
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        pointer-events: none;
+        overflow: hidden;
+    }
+    .page-bg-fixed video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        filter: brightness(0.28) saturate(1.6);
+    }
+
+    .news-wrapper { position: relative; padding-bottom: 60px; }
+
+    .news-section-title {
+        font-family: 'Bebas Neue', sans-serif;
+        font-size: 2.8rem; letter-spacing: 6px;
+        color: var(--white); text-align: center;
+        margin-bottom: 40px; text-transform: uppercase;
+        display: flex; align-items: center; justify-content: center; gap: 16px;
+    }
+    .news-section-title::before,
+    .news-section-title::after {
+        content: ''; flex: 1; height: 2px;
+        background: linear-gradient(90deg, transparent, var(--acid));
+        max-width: 120px;
+    }
+    .news-section-title::after { background: linear-gradient(90deg, var(--acid), transparent); }
+
+    .news-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 16px;
+    }
+
+    .news-card {
+        background: rgba(13,13,13,0.96);
+        border: 1.5px solid #2a2a2a;
+        border-radius: 20px; overflow: hidden;
+        cursor: pointer; transition: all 0.25s ease;
+        display: flex; flex-direction: column;
+        text-decoration: none; color: #fff;
+    }
+    .news-card:hover {
+        border-color: #CCFF00; transform: translateY(-5px);
+        box-shadow: 0 16px 40px rgba(204,255,0,0.14), 0 4px 16px rgba(0,0,0,0.7);
+        color: #fff;
+    }
+
+    .news-img-wrap {
+        position: relative; height: 220px; overflow: hidden;
+        background: #0d0d0d; flex-shrink: 0;
+    }
+    .news-img-wrap img {
+        width: 100%; height: 100%; object-fit: cover;
+        transition: transform 0.5s ease, filter 0.3s;
+        filter: saturate(1.1) brightness(0.92);
+    }
+    .news-card:hover .news-img-wrap img { transform: scale(1.07); filter: saturate(1.3) brightness(1.05); }
+
+    .news-img-wrap video {
+        width: 100%; height: 100%; object-fit: cover;
+        pointer-events: none;
+    }
+
+    .news-video-badge {
+        position: absolute; top: 14px; right: 14px;
+        background: rgba(0,0,0,0.75);
+        border: 1.5px solid var(--acid);
+        color: var(--acid);
+        font-family: 'Anton', sans-serif;
+        font-size: 0.7rem; letter-spacing: 2px;
+        padding: 3px 10px; border-radius: 20px;
+        z-index: 2; display: flex; align-items: center; gap: 5px;
+    }
+
+    .news-play-icon {
+        position: absolute; inset: 0;
+        display: flex; align-items: center; justify-content: center;
+        z-index: 3; pointer-events: none;
+    }
+    .news-play-icon i {
+        font-size: 2.5rem; color: var(--acid);
+        filter: drop-shadow(0 2px 8px rgba(0,0,0,0.7));
+        opacity: 0.85; transition: opacity 0.2s;
+    }
+    .news-card:hover .news-play-icon i { opacity: 1; }
+
+    .news-date-badge {
+        position: absolute; top: 14px; left: 14px;
+        background: #CCFF00; color: #000;
+        font-family: 'Bebas Neue', sans-serif;
+        font-size: 0.78rem; letter-spacing: 2px;
+        padding: 4px 12px; border-radius: 20px; z-index: 2;
+    }
+
+    .news-img-placeholder {
+        width: 100%; height: 100%;
+        display: flex; align-items: center; justify-content: center;
+        color: #2a2a2a; font-size: 3rem; background: #111;
+    }
+
+    .news-body { padding: 22px 20px; display: flex; flex-direction: column; flex: 1; }
+    .news-title {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-weight: 800; font-size: 1.05rem; letter-spacing: 0.5px;
+        line-height: 1.35; color: #fff; margin-bottom: 10px; text-transform: uppercase;
+    }
+    .news-excerpt { color: #666; font-size: 0.87rem; line-height: 1.6; margin-bottom: 18px; flex: 1; }
+    .news-read-more {
+        font-family: 'Bebas Neue', sans-serif;
+        font-size: 0.88rem; letter-spacing: 2px;
+        color: #CCFF00; text-transform: uppercase;
+        display: flex; align-items: center; gap: 8px; transition: gap 0.2s;
+    }
+    .news-card:hover .news-read-more { gap: 14px; }
+
+    /* МОДАЛКА */
+    .news-modal-overlay {
+        display: none; position: fixed; top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: rgba(0,0,0,0.88);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        z-index: 9999; align-items: center; justify-content: center; padding: 20px;
+    }
+    .news-modal-overlay.active { display: flex; }
+
+    .news-modal-box {
+        background: #131313;
+        border: 1.5px solid rgba(204,255,0,0.3);
+        border-radius: 20px; width: 100%; max-width: 820px;
+        max-height: 88vh; display: flex; flex-direction: column;
+        box-shadow: 0 24px 80px rgba(0,0,0,0.9);
+        animation: modalIn 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    @keyframes modalIn {
+        from { transform: translateY(-30px) scale(0.95); opacity: 0; }
+        to { transform: translateY(0) scale(1); opacity: 1; }
+    }
+
+    .news-modal-header {
+        display: flex; justify-content: space-between; align-items: flex-start;
+        padding: 22px 26px 18px; border-bottom: 1px solid #222;
+        gap: 16px; background: #0d0d0d; border-radius: 20px 20px 0 0;
+    }
+    .news-modal-title {
+        font-family: 'Bebas Neue', sans-serif;
+        font-size: 1.5rem; letter-spacing: 3px; color: #fff; line-height: 1.1;
+    }
+    .news-modal-close {
+        background: #1c1c1c; border: 1.5px solid #2a2a2a;
+        color: #fff; width: 36px; height: 36px;
+        border-radius: 10px; display: flex; align-items: center;
+        justify-content: center; cursor: pointer;
+        transition: all 0.2s; flex-shrink: 0; font-size: 1rem;
+    }
+    .news-modal-close:hover { background: #CCFF00; color: #000; border-color: #CCFF00; }
+
+    .news-modal-body { overflow-y: auto; padding: 22px 26px; flex: 1; }
+    .news-modal-body::-webkit-scrollbar { width: 4px; }
+    .news-modal-body::-webkit-scrollbar-thumb { background: #CCFF00; border-radius: 10px; }
+
+    .news-modal-video {
+        width: 100%; border-radius: 14px; margin-bottom: 22px;
+        max-height: 420px; object-fit: cover;
+        border: 1.5px solid rgba(204,255,0,0.2);
+        background: #000;
+    }
+
+    .news-modal-img {
+        width: 100%; border-radius: 14px; margin-bottom: 22px;
+        max-height: 380px; object-fit: cover; filter: saturate(1.1);
+    }
+    .news-modal-content { color: rgba(255,255,255,0.72); font-size: 0.98rem; line-height: 1.85; }
+
+    .news-modal-footer {
+        padding: 14px 26px 18px; border-top: 1px solid #222;
+        display: flex; justify-content: flex-end;
+    }
+    .btn-close-modal {
+        background: #1c1c1c; color: #fff; border: 1.5px solid #2a2a2a;
+        padding: 10px 22px; border-radius: 10px;
+        font-family: 'Bebas Neue', sans-serif;
+        font-size: 0.88rem; letter-spacing: 2px;
+        cursor: pointer; transition: all 0.2s;
+    }
+    .btn-close-modal:hover { background: #CCFF00; color: #000; border-color: #CCFF00; }
+
+    @media (max-width: 576px) {
+        .news-grid { grid-template-columns: 1fr; }
+        .news-section-title { font-size: 2rem; }
+    }
+</style>
+
+<!-- Фіксований фон — відео -->
+<div class="page-bg-fixed">
+    <video autoplay muted loop playsinline>
+        <source src="{% static 'video.mp4' %}" type="video/mp4">
+    </video>
+</div>
+
+<div class="news-wrapper">
+    <div class="news-section-title">Останні події</div>
+
+    <div class="news-grid">
+        {% for item in news_list %}
+        <div class="news-card" onclick="openNewsModal('nm-{{ item.id }}')">
+            <div class="news-img-wrap">
+                <span class="news-date-badge">{{ item.created_at|date:"d M Y" }}</span>
+
+                {% if item.video %}
+                    <video src="{{ item.video.url }}" muted loop playsinline
+                           onmouseenter="this.play()" onmouseleave="this.pause(); this.currentTime=0;">
+                    </video>
+                    <div class="news-play-icon"><i class="bi bi-play-circle-fill"></i></div>
+                    <div class="news-video-badge"><i class="bi bi-camera-video-fill"></i> ВІДЕО</div>
+                {% elif item.image %}
+                    <img src="{{ item.image.url }}" alt="{{ item.title }}">
+                {% else %}
+                    <div class="news-img-placeholder"><i class="bi bi-newspaper"></i></div>
+                {% endif %}
+            </div>
+            <div class="news-body">
+                <div class="news-title">{{ item.title }}</div>
+                <div class="news-excerpt">{{ item.description|truncatewords:18 }}</div>
+                <div class="news-read-more">
+                    {% if item.video %}<i class="bi bi-play-fill"></i> Дивитись{% else %}Читати далі <i class="bi bi-arrow-right"></i>{% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+{% for item in news_list %}
+<div id="nm-{{ item.id }}" class="news-modal-overlay" onclick="closeNewsOnOverlay(event, 'nm-{{ item.id }}')">
+    <div class="news-modal-box">
+        <div class="news-modal-header">
+            <div class="news-modal-title">{{ item.title }}</div>
+            <button class="news-modal-close" onclick="closeNewsModal('nm-{{ item.id }}')">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+        <div class="news-modal-body">
+
+            {% if item.video %}
+                <video class="news-modal-video" controls playsinline preload="metadata">
+                    <source src="{{ item.video.url }}" type="video/mp4">
+                    Ваш браузер не підтримує відео.
+                </video>
+            {% elif item.image %}
+                <img src="{{ item.image.url }}" class="news-modal-img" alt="{{ item.title }}">
+            {% endif %}
+
+            <div class="news-modal-content">{{ item.content|linebreaks }}</div>
+        </div>
+        <div class="news-modal-footer">
+            <button class="btn-close-modal" onclick="closeNewsModal('nm-{{ item.id }}')">Закрити</button>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<script>
+    function openNewsModal(id) {
+        document.getElementById(id).classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+    function closeNewsModal(id) {
+        var modal = document.getElementById(id);
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+        var video = modal.querySelector('video');
+        if (video) { video.pause(); video.currentTime = 0; }
+    }
+    function closeNewsOnOverlay(e, id) {
+        if (e.target.id === id) closeNewsModal(id);
+    }
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            document.querySelectorAll('.news-modal-overlay.active').forEach(function(m) {
+                closeNewsModal(m.id);
+            });
+        }
+    });
+</script>
+{% endblock %}

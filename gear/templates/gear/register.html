@@ -1,0 +1,282 @@
+{% extends "gear/base.html" %}
+
+{% block title %}Реєстрація - Extreme Gear{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+
+        <div class="auth-logo-line"></div>
+
+        <div class="auth-tag">⚡ Новий акаунт</div>
+        <h1 class="auth-title">СТВОРИТИ<br><span>АКАУНТ</span></h1>
+
+        {% if messages %}
+            <div class="messages-container">
+                {% for message in messages %}
+                    {% if message.tags == 'error' %}
+                        <div class="alert-danger">
+                            <i class="bi bi-exclamation-triangle-fill"></i> {{ message }}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <form method="POST" id="registerForm">
+            {% csrf_token %}
+
+            <div class="auth-input-group">
+                <label>Логін</label>
+                <div class="input-wrap">
+                    <i class="bi bi-person"></i>
+                    <input type="text" name="username" required placeholder="Напр. alex_extreme">
+                </div>
+            </div>
+
+            <div class="auth-input-group">
+                <label>E-Mail</label>
+                <div class="input-wrap">
+                    <i class="bi bi-envelope"></i>
+                    <input type="email" name="email" required placeholder="example@mail.com">
+                </div>
+            </div>
+
+            <div class="auth-input-group">
+                <label>Пароль</label>
+                <div class="input-wrap">
+                    <i class="bi bi-key"></i>
+                    <input type="password" id="regPassword" name="password" required placeholder="Мінімум 8 символів" oninput="checkStrength()">
+                </div>
+                <span id="password-strength-text"></span>
+            </div>
+
+            <div class="auth-input-group">
+                <label>Підтвердження пароля</label>
+                <div class="input-wrap">
+                    <i class="bi bi-check-circle"></i>
+                    <input type="password" name="password_confirm" required placeholder="Повторіть пароль">
+                </div>
+            </div>
+
+            <button type="submit" class="auth-submit-btn">
+                <i class="bi bi-person-plus-fill me-2"></i> Зареєструватися
+            </button>
+        </form>
+
+        <div class="auth-footer">
+            Вже маєте акаунт? <a href="{% url 'login' %}">Увійти</a>
+        </div>
+    </div>
+</div>
+
+<style>
+    .auth-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 80vh;
+        padding: 40px 20px;
+    }
+
+   .auth-card {
+    background: var(--dark2);
+    border: 1.5px solid rgba(174,221,0,0.25);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6), 0 0 40px rgba(174,221,0,0.04);
+    width: 100%;
+    max-width: 460px;
+    padding: 40px 36px 36px;
+    position: relative;
+    overflow: hidden;
+    animation: cardAppear 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+    .auth-logo-line {
+        position: absolute;
+        left: 0; top: 0; bottom: 0;
+        width: 4px;
+        background: linear-gradient(180deg, var(--acid), var(--neon-orange), var(--neon-pink));
+        border-radius: var(--radius-lg) 0 0 var(--radius-lg);
+    }
+
+    .auth-tag {
+        display: inline-block;
+        background: var(--acid);
+        color: var(--black);
+        font-family: 'Anton', sans-serif;
+        font-size: 0.75rem;
+        letter-spacing: 3px;
+        padding: 4px 14px;
+        border-radius: 20px;
+        margin-bottom: 14px;
+    }
+
+    .auth-title {
+        font-family: 'Russo One', sans-serif;
+        font-size: 2.4rem;
+        letter-spacing: 3px;
+        color: var(--white);
+        margin-bottom: 28px;
+        line-height: 1.1;
+        text-transform: uppercase;
+    }
+
+    .auth-title span {
+        color: var(--acid);
+        text-shadow: 0 0 30px rgba(174,221,0,0.4);
+    }
+
+    .alert-danger {
+        background: rgba(255,77,77,0.1);
+        color: #ff6b6b;
+        border: 1.5px solid rgba(255,77,77,0.3);
+        padding: 12px 16px;
+        border-radius: var(--radius-sm);
+        margin-bottom: 20px;
+        font-family: 'Barlow Condensed', sans-serif;
+        font-weight: 700;
+        font-size: 0.9rem;
+        letter-spacing: 1px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .auth-input-group {
+        margin-bottom: 18px;
+    }
+
+    .auth-input-group label {
+        display: block;
+        font-family: 'Barlow Condensed', sans-serif;
+        font-weight: 700;
+        font-size: 0.75rem;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: var(--gray);
+        margin-bottom: 7px;
+    }
+
+    .input-wrap {
+        display: flex;
+        align-items: center;
+        background: var(--dark3);
+        border: 1.5px solid var(--gray2);
+        border-radius: var(--radius-sm);
+        overflow: hidden;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .input-wrap:focus-within {
+        border-color: var(--acid);
+        box-shadow: 0 0 0 3px var(--acid-glow);
+    }
+
+    .input-wrap i {
+        padding: 0 14px;
+        color: var(--acid);
+        font-size: 1rem;
+        flex-shrink: 0;
+    }
+
+    .input-wrap input {
+        background: transparent;
+        border: none;
+        outline: none;
+        color: var(--white);
+        padding: 12px 14px 12px 0;
+        width: 100%;
+        font-family: 'Barlow', sans-serif;
+        font-size: 0.95rem;
+    }
+
+   .input-wrap input::placeholder { color: var(--gray); }
+
+.input-wrap input:-webkit-autofill,
+.input-wrap input:-webkit-autofill:hover,
+.input-wrap input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0px 1000px var(--dark3) inset !important;
+    -webkit-text-fill-color: var(--white) !important;
+    caret-color: var(--white);
+}
+
+    #password-strength-text {
+        font-size: 0.75rem;
+        font-weight: 700;
+        margin-top: 6px;
+        display: block;
+        font-family: 'Barlow Condensed', sans-serif;
+        letter-spacing: 1px;
+    }
+    .text-weak   { color: #ff4d4d; }
+    .text-medium { color: var(--acid); }
+    .text-strong { color: #39ff14; }
+
+    .auth-submit-btn {
+        background: var(--acid);
+        color: var(--black);
+        border: none;
+        width: 100%;
+        padding: 15px;
+        border-radius: var(--radius-sm);
+        font-family: 'Anton', sans-serif;
+        font-size: 1.05rem;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: all 0.2s;
+        margin-top: 8px;
+        box-shadow: 0 4px 20px rgba(174,221,0,0.22);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .auth-submit-btn:hover {
+        background: var(--white);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 28px rgba(174,221,0,0.18);
+    }
+
+    .auth-footer {
+        margin-top: 22px;
+        text-align: center;
+        color: var(--gray);
+        font-size: 0.9rem;
+    }
+
+    .auth-footer a {
+        color: var(--acid);
+        font-weight: 700;
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+
+  .auth-footer a:hover { color: var(--white); }
+
+    @keyframes cardAppear {
+        0%   { opacity: 0; transform: translateY(30px) scale(0.97); filter: brightness(0); }
+        60%  { filter: brightness(0.5); }
+        100% { opacity: 1; transform: translateY(0) scale(1); filter: brightness(1); }
+    }
+</style>
+
+<script>
+    function checkStrength() {
+        const password = document.getElementById('regPassword').value;
+        const text = document.getElementById('password-strength-text');
+        if (password.length === 0) { text.innerHTML = ""; return; }
+        if (password.length < 8) {
+            text.innerHTML = "❌ Пароль занадто короткий (мін. 8 символів)!";
+            text.className = "text-weak";
+        } else if (!/\d/.test(password)) {
+            text.innerHTML = "⚠️ Додайте хоча б одну цифру!";
+            text.className = "text-medium";
+        } else {
+            text.innerHTML = "✅ Надійний пароль!";
+            text.className = "text-strong";
+        }
+    }
+</script>
+
+{% endblock %}

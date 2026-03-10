@@ -1,0 +1,47 @@
+{% extends "gear/base.html" %}
+
+{% block title %}{{ category.name }} - Extreme Gear{% endblock %}
+
+{% block content %}
+<h1>📂 {{ category.name }}</h1>
+
+{% if category.description %}
+<div style="background: white; padding: 1.5rem; border-radius: 8px; margin-top: 1rem; border-left: 4px solid var(--primary-color);">
+    <p>{{ category.description }}</p>
+</div>
+{% endif %}
+
+<h2 style="margin-top: 2rem;">🎯 Спорядження категорії "{{ category.name }}" ({{ gear_count }})</h2>
+
+{% if gear_list %}
+<div class="gear-grid">
+    {% for gear in gear_list %}
+    <div class="gear-card" onclick="window.location.href='{% url 'gear_detail' gear.id %}'">
+        <div class="gear-image">
+            <span style="font-size: 3rem;">🎿</span>
+        </div>
+        <div class="gear-content">
+            <div class="gear-name">{{ gear.name }}</div>
+            <div class="gear-brand">{{ gear.brand }}</div>
+            {% if gear.price %}
+            <div class="gear-price">{{ gear.price }} ₴</div>
+            {% endif %}
+            <div class="gear-rating">
+                <span class="stars">★★★★★</span>
+                <span>({{ gear.reviews.count }})</span>
+            </div>
+            <span class="stock-badge {% if gear.in_stock %}in-stock{% else %}out-stock{% endif %}">
+                {% if gear.in_stock %}✓ В наявності{% else %}✗ Немає в наявності{% endif %}
+            </span>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div style="background: #fff3cd; padding: 2rem; border-radius: 8px; margin-top: 2rem;">
+    <p>📭 На даний момент немає спорядження в категорії "{{ category.name }}". Повертайтеся пізніше!</p>
+</div>
+{% endif %}
+
+<a href="{% url 'home' %}" class="btn btn-secondary" style="margin-top: 2rem;">← Повернутися на головну</a>
+{% endblock %}

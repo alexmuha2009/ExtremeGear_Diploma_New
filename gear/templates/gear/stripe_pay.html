@@ -1,0 +1,100 @@
+{% extends 'gear/base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow p-4">
+                <h2 class="mb-4 text-center">Оплата замовлення</h2>
+                <p class="text-muted text-center">Сума до сплати: <strong>{{ total_price }} грн</strong></p>
+                
+                <form id="payment-form">
+                    {% csrf_token %}
+                    <div id="payment-element" class="mb-3">
+                        </div>
+                    <button id="submit" class="btn btn-primary w-100 py-2">
+                        <span id="button-text">Сплатити зараз</span>
+                        <div class="spinner-border spinner-border-sm d-none" id="spinner" role="status"></div>
+                    </button>
+                    <div id="payment-message" class="alert alert-danger mt-3 d-none"></div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+    // 👇 ВСТАВ СВІЙ ПУБЛІЧНИЙ КЛЮЧ (Publishable key) З ПАНЕЛІ STRIPE
+    // Він починається на pk_test_...
+    const stripe = Stripe('pk_test_51T2mqv85neBfFUPG3D7v6f2X6lR1i8pL6kS0U8U8v9v9v9v9v9v9v9v9v9v9v9v9v9v9v9v'); 
+
+    let elements;
+
+    initialize();
+
+    async function initialize() {
+        // Отримуємо clientSecret з твого Django API
+        const response = await fetch("{% url 'create_payment_intent' %}", {
+            method: "POST",
+            headers: { 
+                "Content-Type": "application/json",
+                "X-CSRFToken": "{{ csrf_token }}" // Додано CSRF захист для безпеки Django
+            },
+            body: JSON.stringify({ 
+                "gear_id": "{{ gear.id|default:'' }}" 
+            }),
+        });
+        
+        const data = await response.json();
+        
+        if (data.error) {
+            console.error(data.error);
+            return;
+        }
+
+        const clientSecret = data.clientSecret;
+        elements = stripe.elements({ clientSecret });
+
+        const paymentElement = elements.create("payment");
+        paymentElement.mount("#payment-element");
+    }
+
+    const form = document.getElementById("payment-form");
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        setLoading(true);
+
+        const { error } = await stripe.confirmPayment({
+            elements,
+            confirmParams: {
+                // Шлях успіху після оплати
+                return_url: window.location.origin + "{% url 'order_success' %}",
+            },
+        });
+
+        if (error) {
+            const messageContainer = document.querySelector("#payment-message");
+            messageContainer.textContent = error.message;
+            messageContainer.classList.remove("d-none");
+        }
+        setLoading(false);
+    });
+
+    function setLoading(isLoading) {
+        const submitBtn = document.querySelector("#submit");
+        const spinner = document.querySelector("#spinner");
+        const btnText = document.querySelector("#button-text");
+        
+        if (isLoading) {
+            submitBtn.disabled = true;
+            spinner.classList.remove("d-none");
+            btnText.classList.add("d-none");
+        } else {
+            submitBtn.disabled = false;
+            spinner.classList.add("d-none");
+            btnText.classList.remove("d-none");
+        }
+    }
+</script>
+{% endblock %}
