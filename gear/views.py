@@ -514,10 +514,14 @@ def query_openrouter(request):
         if not prompt:
             return JsonResponse({'content': "Напишіть, що вас цікавить..."})
 
-        # ✅ Динамічний підбір товарів під запит користувача
-        products_from_db = get_relevant_products(prompt, limit=5)
+        products_from_db = list(
+    Gear.objects.filter(in_stock=True)
+    .annotate(price_float=Cast('price', FloatField()))
+    .values('id', 'name', 'description', 'price_float', 'image_url')
+)
 
-        api_key = "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"
+        # api_key = "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" 
+        api_key = "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"
         url = "https://openrouter.ai/api/v1/chat/completions"
 
         headers = {
@@ -535,34 +539,36 @@ def query_openrouter(request):
 
         system_instruction = (
             f"""Ти — консультант магазину екстремального спорядження. 
-Твоя єдина тема: спортивне спорядження, екіпірування, виживання та екстремальний спорт.
+            Твоя єдина тема: спортивне спорядження, екіпірування, виживання та екстремальний спорт.
 
-ПРАВИЛА ВІДПОВІДЕЙ:
-1. Питання про конкретне спорядження або екіпірування → детальна відповідь з посиланнями на товари.
-2. Питання про вид спорту → коротка відповідь + перенаправляй до теми спорядження.
-3. Будь-яке інше питання (політика, кулінарія, програмування тощо) → 
-   ЛИШЕ відповідай: "Я консультант з екстремального спорядження і можу допомогти лише 
-   з питань екіпірування та спорту. Що вас цікавить зі спорядження?"
-   НЕ відповідай на саме питання, навіть частково.
+            ПРАВИЛА ВІДПОВІДЕЙ:
+            1. Питання про конкретне спорядження або екіпірування → детальна відповідь з посиланнями на товари.
+            2. Питання про вид спорту → коротка відповідь + перенаправляй до теми спорядження.
+            3. Будь-яке інше питання (політика, кулінарія, програмування тощо) → 
+            ЛИШЕ відповідай: "Я консультант з екстремального спорядження і можу допомогти лише 
+            з питань екіпірування та спорту. Що вас цікавить зі спорядження?"
+            НЕ відповідай на саме питання, навіть частково.
 
-Відповідай українською. Форматуй відповідь HTML тегами.
-ВАЖЛИВО: повертай ТІЛЬКИ чистий HTML без markdown-огорож (без ```html або ```).
 
-{inventory_block}
 
-ПРАВИЛА ВІДОБРАЖЕННЯ ТОВАРІВ:
-- Кожен згаданий товар ОБОВ'ЯЗКОВО відображай у такому форматі:
-<a href="http://localhost:8000/gear/<id товару>/" style="display:inline-flex;align-items:center;gap:10px;text-decoration:none;color:inherit;">
-  <img src="http://127.0.0.1:8000/api/gear/<id товару>/image/" alt="назва товару" style="width:80px;height:80px;object-fit:cover;border-radius:8px;flex-shrink:0;">
-  <span>назва товару</span>
-</a>
-- Приклад для товару з id=351:
-<a href="http://localhost:8000/gear/351/" style="display:inline-flex;align-items:center;gap:10px;text-decoration:none;color:inherit;">
-  <img src="http://127.0.0.1:8000/api/gear/351/image/" alt="Шолом Fox V3 RS Carbon" style="width:80px;height:80px;object-fit:cover;border-radius:8px;flex-shrink:0;">
-  <span>Шолом Fox V3 RS Carbon</span>
-</a>
-- Ніколи не згадуй товар просто текстом — завжди з картинкою та посиланням.
-- Якщо потрібного товару немає в інвентарі — вибачайся та пропонуй альтернативу з наявного списку."""
+            Відповідай українською. Форматуй відповідь HTML тегами.
+            ВАЖЛИВО: повертай ТІЛЬКИ чистий HTML без markdown-огорож (без ```html або ```).
+            Ось наш поточний інвентар (у форматі JSON):
+            {products_from_db}
+
+            ПРАВИЛА ВІДОБРАЖЕННЯ ТОВАРІВ:
+            - Кожен згаданий товар ОБОВ'ЯЗКОВО відображай у такому форматі:
+            <a href="http://localhost:8000/gear/<id товару>/" style="display:inline-flex;align-items:center;gap:10px;text-decoration:none;color:inherit;">
+            <img src="http://127.0.0.1:8000/api/gear/<id товару>/image/" alt="назва товару" style="width:80px;height:80px;object-fit:cover;border-radius:8px;flex-shrink:0;">
+            <span>назва товару</span>
+            </a>
+            - Приклад для товару з id=351:
+            <a href="http://localhost:8000/gear/351/" style="display:inline-flex;align-items:center;gap:10px;text-decoration:none;color:inherit;">
+            <img src="http://127.0.0.1:8000/api/gear/351/image/" alt="Шолом Fox V3 RS Carbon" style="width:80px;height:80px;object-fit:cover;border-radius:8px;flex-shrink:0;">
+            <span>Шолом Fox V3 RS Carbon</span>
+            </a>
+            - Ніколи не згадуй товар просто текстом — завжди з картинкою та посиланням.
+            - Якщо потрібного товару немає в інвентарі — вибачайся та пропонуй альтернативу з наявного списку."""
         )
 
         data = {
@@ -573,7 +579,7 @@ def query_openrouter(request):
             ]
         }
         print("--------------------------------")
-        print(f"DEBUG: Відправляємо запит до OpenRouter: {prompt}")
+        print(f"DEBUG: Відправляємо запит до OpenRouter: {prompt},{products_from_db}")
         print("================================")
 
         response = requests.post(url, headers=headers, json=data)
