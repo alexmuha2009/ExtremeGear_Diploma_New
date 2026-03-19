@@ -20,7 +20,7 @@ urlpatterns = [
     # --- АВТОРИЗАЦІЯ ТА РЕЄСТРАЦІЯ ---
     path('login/', views.user_login, name='login'),
     path('register/', views.user_register, name='register'),
-    path('logout/', views.user_logout, name='logout'), # Додано вихід
+    path('logout/', views.user_logout, name='logout'),
 
     # --- СТОРІНКА УСПІХУ ---
     path('order-success/', views.order_success, name='order_success'),
@@ -29,6 +29,7 @@ urlpatterns = [
     path('api/ai-chat/', views.query_openrouter, name='ai_chat'),
     path('api/calculate-gear/', views.calculate_gear_api, name='calculate_gear_api'),
     path('api/create-payment-intent/', views.create_payment_intent, name='create_payment_intent'),
+    path('api/gear/<int:gear_id>/image/', views.get_gear_image_redirect, name='gear_image'),  # ✅ ДОДАНО
 
     # --- 🛒 КОШИК ---
     path('cart/', views.cart_detail, name='cart_detail'),
@@ -38,7 +39,6 @@ urlpatterns = [
 
     # --- 🚀 ШВИДКЕ ЗАМОВЛЕННЯ ---
     path('order/<int:gear_id>/', views.quick_order, name='quick_order'),
-
 ]
 
 if settings.DEBUG:

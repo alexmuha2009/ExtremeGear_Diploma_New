@@ -4,7 +4,6 @@
 
 {% block content %}
 <style>
-    /* Фон через окремий div — не конфліктує з base.html */
     .page-bg-fixed {
         position: fixed;
         inset: 0;
@@ -51,7 +50,6 @@
         overflow: hidden;
     }
 
-    /* Таблиця */
     .cart-table { width: 100%; border-collapse: collapse; }
     .cart-table thead tr { border-bottom: 1px solid #2a2a2a; }
     .cart-table th {
@@ -79,7 +77,6 @@
     .cart-item-img img {
         max-width: 100%; max-height: 100%;
         object-fit: contain;
-        /* КОЛЬОРОВЕ — без mix-blend-mode */
     }
 
     .cart-item-name {
@@ -165,7 +162,6 @@
     }
     .btn-checkout:hover { background: #fff; transform: translateY(-2px); }
 
-    /* Порожній кошик */
     .empty-cart {
         text-align: center; padding: 80px 40px;
         background: rgba(13,13,13,0.96);
@@ -188,7 +184,6 @@
     }
     .btn-to-catalog:hover { background: #fff; }
 
-    /* Модалка */
     #cartModal .modal-content {
         background: #131313;
         border: 1.5px solid rgba(204,255,0,0.3);
@@ -347,9 +342,19 @@
                 <label class="form-label">Email</label>
                 <input type="email" name="email" class="form-control" placeholder="example@gmail.com">
             </div>
+            <div class="mb-3">
+                <div style="background:rgba(204,255,0,0.06); border:1px solid rgba(204,255,0,0.2); border-radius:10px; padding:12px 14px; margin-bottom:10px; font-size:0.82rem; color:rgba(255,255,255,0.7);">
+                    <i class="bi bi-telegram me-1" style="color:#CCFF00;"></i>
+                    <b style="color:#CCFF00;">Хочете підтвердження в Telegram?</b><br>
+                    1. Напишіть <b>/start</b> боту <a href="https://t.me/usernemepro_bot" target="_blank" style="color:#CCFF00;">@usernemepro_bot</a><br>
+                    2. Вкажіть свій @username нижче
+                </div>
+                <label class="form-label">Telegram username <span style="color:#555; font-weight:400;">(необов'язково)</span></label>
+                <input type="text" name="telegram" class="form-control" placeholder="@username">
+            </div>
             <div class="info-box">
                 <i class="bi bi-shield-lock-fill"></i>
-                Після підтвердження ви перейдете на захищену сторінку оплати LiqPay.
+                Після підтвердження ви перейдете на захищену сторінку оплати Stripe.
             </div>
             <button type="submit" class="btn-submit-order">
                 <i class="bi bi-lightning-fill me-1"></i> Підтвердити і купити

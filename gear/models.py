@@ -95,6 +95,7 @@ class Order(models.Model):
     customer_name = models.CharField(max_length=100, verbose_name="Ім'я клієнта")
     customer_phone = models.CharField(max_length=20, verbose_name="Телефон")
     customer_email = models.EmailField(verbose_name="Email", blank=True, null=True)
+    customer_telegram = models.CharField(max_length=100, verbose_name="Telegram", blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата замовлення")
 
     class Meta:
