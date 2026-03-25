@@ -206,6 +206,7 @@
             <a href="{% url 'home' %}#sports" id="nav-sports" class="{% if request.path == '/' and request.GET.sport_id %}active{% endif %}" onclick="navScrollTo(event,'sports',this)">Спорт</a>
             <a href="{% url 'home' %}#gear" id="nav-gear" class="{% if request.path|slice:':6' == '/gear/' or request.path|slice:':10' == '/category/' or request.path|slice:':8' == '/search/' or request.path|slice:':6' == '/cart/' or 'gear_table' in request.path %}active{% endif %}" onclick="navScrollTo(event,'gear',this)">Каталог</a>
             <a href="{% url 'news' %}" id="nav-news" class="{% if '/news' in request.path %}active{% endif %}">Новини</a>
+            <a href="{% url 'rental_list' %}" id="nav-rental" class="{% if '/rental' in request.path %}active{% endif %}">Оренда</a>
         </nav>
         <div class="header-right">
             <form class="search-bar" method="GET" action="{% url 'search_gear' %}">

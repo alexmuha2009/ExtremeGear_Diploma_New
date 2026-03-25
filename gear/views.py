@@ -5,7 +5,7 @@ from django.http import JsonResponse, HttpResponse
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.contrib import messages
-from .models import Sport, GearCategory, Gear, News, Order
+from .models import Sport, GearCategory, Gear, News, Order, RentalItem, Rental
 from django.db.models import FloatField
 from django.db.models.functions import Cast
 import json
@@ -15,12 +15,10 @@ import re
 import os
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
+from decimal import Decimal
 
 load_dotenv()
 
-# ==========================================
-# 👇 НАЛАШТУВАННЯ TELEGRAM ТА STRIPE
-# ==========================================
 TELEGRAM_BOT_TOKEN = '8628245847:AAG3Mlxk2ycbuGVnXg1ouHhzo-j9lqjem6E'
 TELEGRAM_CHAT_ID = '1654502612'
 
@@ -28,7 +26,6 @@ stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 
 
 def send_telegram_order(name, phone, items_list, total_price):
-    """Надсилає сповіщення адміну магазину про нове замовлення"""
     if TELEGRAM_BOT_TOKEN == 'СЮДИ_ВСТАВ_ТОКЕН_БОТА':
         return
     try:
@@ -37,15 +34,12 @@ def send_telegram_order(name, phone, items_list, total_price):
         message += f"📞 <b>Телефон:</b> {phone}\n"
         message += f"➖➖➖➖➖➖➖➖➖➖\n"
         message += f"🛒 <b>ТОВАРИ:</b>\n"
-
         for item in items_list:
             gear_name = item['gear'].name if isinstance(item['gear'], Gear) else item['gear'].name
             quantity = item['quantity']
             message += f"▫️ {gear_name} — {quantity} шт.\n"
-
         message += f"➖➖➖➖➖➖➖➖➖➖\n"
         message += f"💰 <b>СУМА: {total_price} грн</b>"
-
         url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
         data = {"chat_id": TELEGRAM_CHAT_ID, "text": message, "parse_mode": "HTML"}
         requests.post(url, data=data)
@@ -53,8 +47,27 @@ def send_telegram_order(name, phone, items_list, total_price):
         print(f"Помилка Telegram: {e}")
 
 
+def send_telegram_rental(name, phone, item_name, start_date, end_date, total_price):
+    try:
+        message = (
+            f"🏍️ <b>НОВА ОРЕНДА!</b>\n"
+            f"👤 <b>Клієнт:</b> {name}\n"
+            f"📞 <b>Телефон:</b> {phone}\n"
+            f"➖➖➖➖➖➖➖➖➖➖\n"
+            f"🎽 <b>Спорядження:</b> {item_name}\n"
+            f"📅 <b>З:</b> {start_date}\n"
+            f"📅 <b>До:</b> {end_date}\n"
+            f"➖➖➖➖➖➖➖➖➖➖\n"
+            f"💰 <b>СУМА: {total_price} грн</b>"
+        )
+        url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+        data = {"chat_id": TELEGRAM_CHAT_ID, "text": message, "parse_mode": "HTML"}
+        requests.post(url, data=data)
+    except Exception as e:
+        print(f"Помилка Telegram оренда: {e}")
+
+
 def get_chat_id_by_username(username):
-    """Отримує chat_id по username з файлу tg_users.json"""
     import json, os
     users_file = 'tg_users.json'
     if os.path.exists(users_file):
@@ -65,25 +78,20 @@ def get_chat_id_by_username(username):
 
 
 def send_telegram_to_buyer(telegram_username, name, items_list, total_price):
-    """Надсилає підтвердження замовлення покупцю в Telegram"""
     if not telegram_username:
         return
-
     chat_id = get_chat_id_by_username(telegram_username)
     if not chat_id:
-        print(f"DEBUG: chat_id не знайдено для {telegram_username} — покупець не писав /start боту")
+        print(f"DEBUG: chat_id не знайдено для {telegram_username}")
         return
-
     today = datetime.now()
     send_date = (today + timedelta(days=1)).strftime('%d.%m.%Y')
     arrive_date = (today + timedelta(days=4)).strftime('%d.%m.%Y')
-
     items_text = ""
     for item in items_list:
         gear_name = item['gear'].name
         quantity = item['quantity']
         items_text += f"▫️ {gear_name} — {quantity} шт.\n"
-
     message = (
         f"✅ <b>Замовлення підтверджено!</b>\n\n"
         f"👤 <b>Клієнт:</b> {name}\n"
@@ -96,58 +104,44 @@ def send_telegram_to_buyer(telegram_username, name, items_list, total_price):
         f"📍 <b>Вкажіть адресу доставки у відповідь на це повідомлення:</b>\n"
         f"Місто: ...\nВідділення НП: ...\nКоментар: ..."
     )
-
     try:
         url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
-        data = {
-            "chat_id": chat_id,
-            "text": message,
-            "parse_mode": "HTML"
-        }
+        data = {"chat_id": chat_id, "text": message, "parse_mode": "HTML"}
         response = requests.post(url, data=data)
         print(f"DEBUG Telegram buyer response: {response.status_code}")
     except Exception as e:
         print(f"Помилка надсилання покупцю: {e}")
 
 
-# --- 🔑 АВТОРИЗАЦІЯ ТА РЕЄСТРАЦІЯ ---
-
 def user_login(request):
     if request.user.is_authenticated:
         return redirect('home')
-
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
         user = authenticate(request, username=username, password=password)
-
         if user is not None:
             login(request, user)
             if user.is_staff:
                 return redirect('admin:index')
-
             next_url = request.GET.get('next')
             if next_url:
                 separator = '&' if '?' in next_url else '?'
                 return redirect(next_url + separator + 'open_modal=1')
-
             return redirect('home')
         else:
             messages.error(request, "Невірний логін або пароль")
-
     return render(request, 'gear/login.html')
 
 
 def user_register(request):
     if request.user.is_authenticated:
         return redirect('home')
-
     if request.method == 'POST':
         username = request.POST.get('username')
         email = request.POST.get('email')
         password = request.POST.get('password')
         password_confirm = request.POST.get('password_confirm')
-
         if password != password_confirm:
             messages.error(request, "Паролі не збігаються!")
         elif len(password) < 8:
@@ -157,16 +151,12 @@ def user_register(request):
         else:
             user = User.objects.create_user(username=username, email=email, password=password)
             user.save()
-
             login(request, user)
-
             next_url = request.GET.get('next')
             if next_url:
                 separator = '&' if '?' in next_url else '?'
                 return redirect(next_url + separator + 'open_modal=1')
-
             return redirect('home')
-
     return render(request, 'gear/register.html')
 
 
@@ -174,8 +164,6 @@ def user_logout(request):
     logout(request)
     return redirect('home')
 
-
-# --- ГОЛОВНІ СТОРІНКИ ---
 
 from django.core.paginator import Paginator
 
@@ -185,7 +173,6 @@ def home(request):
     sport_id = request.GET.get('sport_id')
     filter_type = request.GET.get('filter')
     selected_sport = None
-
     if sport_id:
         selected_sport = get_object_or_404(Sport, id=sport_id)
         gear_list = selected_sport.gears.all()
@@ -199,11 +186,9 @@ def home(request):
         gear_list = Gear.objects.filter(in_stock=True)
     else:
         gear_list = Gear.objects.filter(in_stock=True)
-
     paginator = Paginator(gear_list, 20)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
-
     return render(request, 'gear/base.html', {
         'sports': sports_with_count,
         'selected_sport': selected_sport,
@@ -275,15 +260,12 @@ def beginners_guide(request):
 def add_to_cart(request, gear_id):
     if not request.user.is_authenticated:
         return redirect(f"/login/?next=/gear/{gear_id}/")
-
     cart = request.session.get('cart', {})
     gear_id_str = str(gear_id)
-
     if gear_id_str in cart:
         cart[gear_id_str] += 1
     else:
         cart[gear_id_str] = 1
-
     request.session['cart'] = cart
     return redirect('cart_detail')
 
@@ -291,11 +273,9 @@ def add_to_cart(request, gear_id):
 def remove_from_cart(request, gear_id):
     cart = request.session.get('cart', {})
     gear_id_str = str(gear_id)
-
     if gear_id_str in cart:
         cart.pop(gear_id_str)
         request.session['cart'] = cart
-
     return redirect('cart_detail')
 
 
@@ -303,34 +283,23 @@ def cart_detail(request):
     cart = request.session.get('cart', {})
     cart_items = []
     total_price = 0
-
     for gear_id, quantity in cart.items():
         gear = Gear.objects.filter(id=gear_id).first()
         if gear:
             subtotal = gear.price * quantity
             total_price += subtotal
-            cart_items.append({
-                'gear': gear,
-                'quantity': quantity,
-                'subtotal': subtotal
-            })
-
-    return render(request, 'gear/cart.html', {
-        'cart_items': cart_items,
-        'total_price': total_price
-    })
+            cart_items.append({'gear': gear, 'quantity': quantity, 'subtotal': subtotal})
+    return render(request, 'gear/cart.html', {'cart_items': cart_items, 'total_price': total_price})
 
 
 @csrf_exempt
 def create_payment_intent(request):
     if not request.user.is_authenticated:
         return JsonResponse({'error': 'Login required'}, status=401)
-
     if request.method == 'POST':
         try:
             cart = request.session.get('cart', {})
             total_amount = 0
-
             if cart:
                 for gear_id, quantity in cart.items():
                     gear = Gear.objects.filter(id=gear_id).first()
@@ -341,13 +310,10 @@ def create_payment_intent(request):
                 gear_id = data.get('gear_id')
                 gear = get_object_or_404(Gear, id=gear_id)
                 total_amount = int(gear.price * 100)
-
             intent = stripe.PaymentIntent.create(
-                amount=total_amount,
-                currency='uah',
+                amount=total_amount, currency='uah',
                 automatic_payment_methods={'enabled': True},
             )
-
             return JsonResponse({'clientSecret': intent.client_secret})
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=403)
@@ -358,30 +324,23 @@ def checkout_cart(request):
     if request.method == 'POST':
         if not request.user.is_authenticated:
             return redirect('login')
-
         cart = request.session.get('cart', {})
         name = request.POST.get('name')
         phone = request.POST.get('phone')
         email = request.POST.get('email')
         telegram = request.POST.get('telegram', '')
-
         line_items = []
         items_for_tg = []
         total_amount = 0
-
         for gear_id, quantity in cart.items():
             gear = Gear.objects.filter(id=gear_id).first()
             if gear:
                 Order.objects.create(
-                    gear=gear,
-                    customer_name=name,
-                    customer_phone=phone,
-                    customer_email=email,
-                    customer_telegram=telegram
+                    gear=gear, customer_name=name, customer_phone=phone,
+                    customer_email=email, customer_telegram=telegram
                 )
                 items_for_tg.append({'gear': gear, 'quantity': quantity})
                 total_amount += gear.price * quantity
-
                 line_items.append({
                     'price_data': {
                         'currency': 'uah',
@@ -390,15 +349,11 @@ def checkout_cart(request):
                     },
                     'quantity': quantity,
                 })
-
         if not line_items:
             return redirect('cart_detail')
-
         try:
             checkout_session = stripe.checkout.Session.create(
-                payment_method_types=['card'],
-                line_items=line_items,
-                mode='payment',
+                payment_method_types=['card'], line_items=line_items, mode='payment',
                 success_url=request.build_absolute_uri('/order-success/'),
                 cancel_url=request.build_absolute_uri('/cart/'),
             )
@@ -408,7 +363,6 @@ def checkout_cart(request):
             return redirect(checkout_session.url, code=303)
         except Exception as e:
             return HttpResponse(f"Помилка Stripe: {str(e)}")
-
     return redirect('cart_detail')
 
 
@@ -416,23 +370,17 @@ def quick_order(request, gear_id):
     if request.method == 'POST':
         if not request.user.is_authenticated:
             return redirect(f"/register/?next=/gear/{gear_id}/")
-
         gear = get_object_or_404(Gear, id=gear_id)
         name = request.POST.get('name')
         phone = request.POST.get('phone')
         email = request.POST.get('email')
         telegram = request.POST.get('telegram', '')
-
         Order.objects.create(
-            gear=gear,
-            customer_name=name,
-            customer_phone=phone,
-            customer_email=email,
-            customer_telegram=telegram
+            gear=gear, customer_name=name, customer_phone=phone,
+            customer_email=email, customer_telegram=telegram
         )
         send_telegram_order(name, phone, [{'gear': gear, 'quantity': 1}], gear.price)
         send_telegram_to_buyer(telegram, name, [{'gear': gear, 'quantity': 1}], gear.price)
-
         try:
             checkout_session = stripe.checkout.Session.create(
                 payment_method_types=['card'],
@@ -451,44 +399,209 @@ def quick_order(request, gear_id):
             return redirect(checkout_session.url, code=303)
         except Exception as e:
             return HttpResponse(f"Помилка Stripe: {str(e)}")
-
     return redirect('home')
 
 
-def get_relevant_products(user_message: str, limit=5):
-    """Динамічно підбирає товари з інвентарю під запит користувача"""
+# ==========================================
+# ОРЕНДА СПОРЯДЖЕННЯ
+# ==========================================
+
+def rental_list(request):
+    sport_id = request.GET.get('sport_id')
+    sports = Sport.objects.all()
+
+    items = Gear.objects.filter(
+        is_rentable=True,
+        in_stock=True,
+        price_per_day__isnull=False
+    ).distinct()
+
+    selected_sport = None
+    if sport_id:
+        selected_sport = get_object_or_404(Sport, id=sport_id)
+        items = items.filter(sports__id=sport_id).distinct()
+
+    return render(request, 'gear/rental.html', {
+        'rental_items': items,
+        'sports': sports,
+        'selected_sport': selected_sport,
+    })
+
+
+def rental_checkout(request, item_id):
+    if not request.user.is_authenticated:
+        return redirect(f"/login/?next=/rental/{item_id}/")
+
+    item = get_object_or_404(
+        Gear,
+        id=item_id,
+        is_rentable=True,
+        in_stock=True,
+        price_per_day__isnull=False
+    )
+
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        phone = request.POST.get('phone')
+        email = request.POST.get('email')
+        telegram = request.POST.get('telegram', '')
+        start_date = request.POST.get('start_date')
+        end_date = request.POST.get('end_date')
+
+        try:
+            start = datetime.strptime(start_date, '%Y-%m-%d').date()
+            end = datetime.strptime(end_date, '%Y-%m-%d').date()
+            days = (end - start).days
+
+            if days < 1:
+                messages.error(request, "Дата закінчення має бути пізніше дати початку!")
+                return redirect(f"/rental/{item_id}/")
+
+            total_price = item.price_per_day * days
+
+            rental = Rental.objects.create(
+                gear=item,
+                customer_name=name,
+                customer_phone=phone,
+                customer_email=email,
+                customer_telegram=telegram,
+                start_date=start,
+                end_date=end,
+                total_price=total_price,
+                status='pending'
+            )
+
+            checkout_session = stripe.checkout.Session.create(
+                payment_method_types=['card'],
+                line_items=[{
+                    'price_data': {
+                        'currency': 'uah',
+                        'product_data': {
+                            'name': f"Оренда: {item.name} ({days} діб)"
+                        },
+                        'unit_amount': int(total_price * 100),
+                    },
+                    'quantity': 1,
+                }],
+                mode='payment',
+                success_url=request.build_absolute_uri(f'/rental/success/{rental.id}/'),
+                cancel_url=request.build_absolute_uri(f'/rental/{item_id}/'),
+            )
+
+            rental.stripe_session_id = checkout_session.id
+            rental.save()
+
+            send_telegram_rental(
+                name,
+                phone,
+                item.name,
+                start_date,
+                end_date,
+                total_price
+            )
+
+            return redirect(checkout_session.url, code=303)
+
+        except Exception as e:
+            messages.error(request, f"Помилка: {str(e)}")
+            return redirect(f"/rental/{item_id}/")
+
+    return render(request, 'gear/rental_detail.html', {'item': item})
+
+
+def rental_success(request, rental_id):
+    rental = get_object_or_404(Rental, id=rental_id)
+    rental.status = 'confirmed'
+    rental.save()
+    return render(request, 'gear/rental_success.html', {'rental': rental})
+
+
+@csrf_exempt
+def rental_price_api(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            item_id = data.get('item_id')
+            start_date = data.get('start_date')
+            end_date = data.get('end_date')
+
+            item = get_object_or_404(
+                Gear,
+                id=item_id,
+                is_rentable=True,
+                in_stock=True,
+                price_per_day__isnull=False
+            )
+
+            start = datetime.strptime(start_date, '%Y-%m-%d').date()
+            end = datetime.strptime(end_date, '%Y-%m-%d').date()
+            days = (end - start).days
+
+            if days < 1:
+                return JsonResponse({'error': 'Невірні дати'}, status=400)
+
+            total = item.price_per_day * days
+            return JsonResponse({
+                'days': days,
+                'price_per_day': float(item.price_per_day),
+                'total': float(total)
+            })
+
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
+
+    return JsonResponse({'error': 'Bad request'}, status=400)
+
+
+# ==========================================
+# AI АСИСТЕНТ
+# ==========================================
+
+def get_relevant_products(user_message: str, limit=6):
     stop_words = {
         'я', 'мені', 'що', 'як', 'де', 'хочу', 'треба', 'можна',
         'будь', 'ласка', 'порадь', 'підбери', 'знайди', 'є', 'у',
         'в', 'на', 'до', 'це', 'той', 'яка', 'який', 'які', 'для',
         'мене', 'нам', 'нас', 'він', 'вона', 'вони', 'ми', 'ти',
-        'про', 'при', 'але', 'або', 'той', 'ця', 'цей', 'так', 'ні'
+        'про', 'при', 'але', 'або', 'той', 'ця', 'цей', 'так', 'ні',
+        'мій', 'потрібен', 'потрібна', 'потрібні', 'потрібно'
     }
-    keywords = [
-        w for w in user_message.lower().split()
-        if w not in stop_words and len(w) > 2
-    ]
-
+    keywords = [w for w in user_message.lower().split() if w not in stop_words and len(w) > 2]
     if not keywords:
         return []
-
     query = Q()
     for keyword in keywords:
         query |= Q(name__icontains=keyword) | Q(description__icontains=keyword)
-
     return list(
-        Gear.objects.filter(in_stock=True)
-        .filter(query)
+        Gear.objects.filter(in_stock=True).filter(query)
         .annotate(price_float=Cast('price', FloatField()))
         .values('id', 'name', 'description', 'price_float', 'image_url')
         [:limit]
     )
 
 
+def render_products_html(products: list) -> str:
+    if not products:
+        return ""
+    html = '<div style="margin-top:16px;">'
+    for p in products:
+        name = p.get('name', '')
+        pid = p.get('id', '')
+        description = p.get('description', '') or ''
+        html += f"""
+<div style="margin-bottom:16px;padding:12px;background:rgba(255,255,255,0.04);border-radius:10px;border:1px solid rgba(174,221,0,0.15);">
+  <a href="http://localhost:8000/gear/{pid}/" style="display:inline-flex;align-items:center;gap:12px;text-decoration:none;color:inherit;">
+    <img src="http://127.0.0.1:8000/api/gear/{pid}/image/" alt="{name}" style="width:80px;height:80px;object-fit:cover;border-radius:8px;flex-shrink:0;">
+    <span style="font-weight:700;font-size:1rem;">{name}</span>
+  </a>
+  <p style="margin:8px 0 0 0;font-size:0.83rem;color:rgba(255,255,255,0.55);line-height:1.5;">{description}</p>
+</div>"""
+    html += '</div>'
+    return html
+
+
 def clean_ai_response(text: str) -> str:
-    """Очищає відповідь AI від markdown-огорож та зайвих символів"""
     text = text.strip()
-    # Прибираємо ```html ... ``` або ``` ... ```
     if text.startswith("```html"):
         text = text[7:]
     elif text.startswith("```"):
@@ -514,16 +627,8 @@ def query_openrouter(request):
         if not prompt:
             return JsonResponse({'content': "Напишіть, що вас цікавить..."})
 
-        products_from_db = list(
-    Gear.objects.filter(in_stock=True)
-    .annotate(price_float=Cast('price', FloatField()))
-    .values('id', 'name', 'description', 'price_float', 'image_url')
-)
-
-        # api_key = "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" 
-        api_key = "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"
+        api_key = "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"
         url = "https://openrouter.ai/api/v1/chat/completions"
-
         headers = {
             "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json",
@@ -531,68 +636,48 @@ def query_openrouter(request):
             "X-Title": "Extreme Gear Store"
         }
 
-        inventory_block = (
-            f"Релевантні товари з нашого інвентарю (JSON):\n{json.dumps(products_from_db, ensure_ascii=False)}"
-            if products_from_db
-            else "Наразі немає товарів, що відповідають цьому запиту."
-        )
+        system_instruction = """Ти — консультант магазину екстремального спорядження.
+Твоя тема: спортивне спорядження, екіпірування, виживання та екстремальний спорт.
 
-        system_instruction = (
-            f"""Ти — консультант магазину екстремального спорядження. 
-            Твоя єдина тема: спортивне спорядження, екіпірування, виживання та екстремальний спорт.
+ОБОВ'ЯЗКОВО постав тег в ПЕРШОМУ рядку відповіді:
+- [SHOW_PRODUCTS] — якщо людина шукає або просить порадити конкретне спорядження чи товар
+- [NO_PRODUCTS] — у всіх інших випадках (травми, поради, техніка, офтопік тощо)
 
-            ПРАВИЛА ВІДПОВІДЕЙ:
-            1. Питання про конкретне спорядження або екіпірування → детальна відповідь з посиланнями на товари.
-            2. Питання про вид спорту → коротка відповідь + перенаправляй до теми спорядження.
-            3. Будь-яке інше питання (політика, кулінарія, програмування тощо) → 
-            ЛИШЕ відповідай: "Я консультант з екстремального спорядження і можу допомогти лише 
-            з питань екіпірування та спорту. Що вас цікавить зі спорядження?"
-            НЕ відповідай на саме питання, навіть частково.
+ПРАВИЛА:
+1. Запит про підбір/пошук спорядження → [SHOW_PRODUCTS] + 2-3 речення вступу.
+2. Запит про спорт, травми, техніку виживання, поради → [NO_PRODUCTS] + розгорнута корисна відповідь.
+3. Офтопік → [NO_PRODUCTS] + ввічливо поясни свою спеціалізацію.
 
-
-
-            Відповідай українською. Форматуй відповідь HTML тегами.
-            ВАЖЛИВО: повертай ТІЛЬКИ чистий HTML без markdown-огорож (без ```html або ```).
-            Ось наш поточний інвентар (у форматі JSON):
-            {products_from_db}
-
-            ПРАВИЛА ВІДОБРАЖЕННЯ ТОВАРІВ:
-            - Кожен згаданий товар ОБОВ'ЯЗКОВО відображай у такому форматі:
-            <a href="http://localhost:8000/gear/<id товару>/" style="display:inline-flex;align-items:center;gap:10px;text-decoration:none;color:inherit;">
-            <img src="http://127.0.0.1:8000/api/gear/<id товару>/image/" alt="назва товару" style="width:80px;height:80px;object-fit:cover;border-radius:8px;flex-shrink:0;">
-            <span>назва товару</span>
-            </a>
-            - Приклад для товару з id=351:
-            <a href="http://localhost:8000/gear/351/" style="display:inline-flex;align-items:center;gap:10px;text-decoration:none;color:inherit;">
-            <img src="http://127.0.0.1:8000/api/gear/351/image/" alt="Шолом Fox V3 RS Carbon" style="width:80px;height:80px;object-fit:cover;border-radius:8px;flex-shrink:0;">
-            <span>Шолом Fox V3 RS Carbon</span>
-            </a>
-            - Ніколи не згадуй товар просто текстом — завжди з картинкою та посиланням.
-            - Якщо потрібного товару немає в інвентарі — вибачайся та пропонуй альтернативу з наявного списку."""
-        )
+Відповідай українською. Повертай ТІЛЬКИ чистий HTML без markdown (без ```html або ```)."""
 
         data = {
-            "model": "arcee-ai/trinity-mini:free",
+            "model": "nvidia/nemotron-3-nano-30b-a3b:free",
             "messages": [
                 {"role": "system", "content": system_instruction},
                 {"role": "user", "content": prompt}
             ]
         }
-        print("--------------------------------")
-        print(f"DEBUG: Відправляємо запит до OpenRouter: {prompt},{products_from_db}")
-        print("================================")
 
         response = requests.post(url, headers=headers, json=data)
         if response.status_code == 200:
             result = response.json()
             ai_text = result["choices"][0]["message"]["content"]
-            # ✅ Очищаємо від markdown, НЕ замінюємо \n на <br>
             ai_text = clean_ai_response(ai_text)
-            return JsonResponse({'content': ai_text})
+
+            if ai_text.startswith("[SHOW_PRODUCTS]"):
+                ai_text = ai_text.replace("[SHOW_PRODUCTS]", "", 1).strip()
+                products_from_db = get_relevant_products(prompt, limit=6)
+                products_html = render_products_html(products_from_db)
+                final_html = ai_text + products_html
+            else:
+                ai_text = ai_text.replace("[NO_PRODUCTS]", "", 1).strip()
+                final_html = ai_text
+
+            return JsonResponse({'content': final_html})
         else:
-            return JsonResponse({'content': f"⚠️ Помилка API: {response.status_code} {response.text[:100]}"})
+            return JsonResponse({'content': f"Помилка API: {response.status_code} {response.text[:100]}"})
     except Exception as e:
-        return JsonResponse({'content': f"⚠️ Помилка сервера: {str(e)}"})
+        return JsonResponse({'content': f"Помилка сервера: {str(e)}"})
 
 
 @csrf_exempt
@@ -615,7 +700,8 @@ def calculate_gear_api(request):
             else:
                 calculated_size = height - 15
                 cloth_advice = "Стандартний розмір. Зверніть увагу на жорсткість спорядження."
-                if weight > 85: calculated_size += 5
+                if weight > 85:
+                    calculated_size += 5
 
             if temp < -10:
                 cloth_advice += " Потрібен надійний теплий захист та якісна термобілизна."
@@ -650,10 +736,8 @@ def calculate_gear_api(request):
 
 
 def get_gear_image_redirect(request, gear_id):
-    """Перенаправляє на картинку товару за його ID для використання в img src"""
     try:
         gear = get_object_or_404(Gear, id=gear_id)
-
         if gear.image:
             return redirect(gear.image.url)
         elif gear.image_url:

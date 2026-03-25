@@ -29,7 +29,8 @@ urlpatterns = [
     path('api/ai-chat/', views.query_openrouter, name='ai_chat'),
     path('api/calculate-gear/', views.calculate_gear_api, name='calculate_gear_api'),
     path('api/create-payment-intent/', views.create_payment_intent, name='create_payment_intent'),
-    path('api/gear/<int:gear_id>/image/', views.get_gear_image_redirect, name='gear_image'),  # ✅ ДОДАНО
+    path('api/gear/<int:gear_id>/image/', views.get_gear_image_redirect, name='gear_image'),
+    path('api/rental/price/', views.rental_price_api, name='rental_price_api'),
 
     # --- 🛒 КОШИК ---
     path('cart/', views.cart_detail, name='cart_detail'),
@@ -39,6 +40,11 @@ urlpatterns = [
 
     # --- 🚀 ШВИДКЕ ЗАМОВЛЕННЯ ---
     path('order/<int:gear_id>/', views.quick_order, name='quick_order'),
+
+    # --- 🏍️ ОРЕНДА ---
+    path('rental/', views.rental_list, name='rental_list'),
+    path('rental/<int:item_id>/', views.rental_checkout, name='rental_checkout'),
+    path('rental/success/<int:rental_id>/', views.rental_success, name='rental_success'),
 ]
 
 if settings.DEBUG:
