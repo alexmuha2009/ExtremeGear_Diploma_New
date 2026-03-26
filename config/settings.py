@@ -81,7 +81,6 @@ SESSION_COOKIE_AGE = 60 * 60 * 24 * 30
 SESSION_SAVE_EVERY_REQUEST = True
 ```
 
-**wsgi.py** — без змін, він вже правильний ✅
 
 ---
 
