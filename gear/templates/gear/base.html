@@ -21,23 +21,26 @@
         *{box-sizing:border-box;}
         body{font-family:'Barlow',sans-serif;background:var(--black);color:var(--white);margin:0;padding:0;min-height:100vh;display:flex;flex-direction:column;overflow-x:hidden;}
 
-        /* HEADER */
-        header{background:rgba(5,5,5,0.92);backdrop-filter:blur(20px);border-bottom:2px solid rgba(174,221,0,0.25);position:sticky;top:0;z-index:1000;}
-        .header-content{display:flex;justify-content:space-between;align-items:stretch;width:100%;padding:0 40px;height:68px;}
-        .logo{font-family:'Anton',sans-serif;font-size:2rem;letter-spacing:4px;color:var(--white);cursor:pointer;display:flex;align-items:center;text-decoration:none;transition:color 0.2s;padding-right:36px;border-right:1px solid var(--gray2);}
+        /* ========== HEADER ========== */
+        header{background:rgba(5,5,5,0.96);backdrop-filter:blur(20px);border-bottom:2px solid rgba(174,221,0,0.25);position:sticky;top:0;z-index:1000;}
+        .header-content{display:flex;justify-content:space-between;align-items:center;width:100%;padding:0 40px;height:68px;}
+        .logo{font-family:'Anton',sans-serif;font-size:2rem;letter-spacing:4px;color:var(--white);cursor:pointer;display:flex;align-items:center;text-decoration:none;transition:color 0.2s;padding-right:36px;border-right:1px solid var(--gray2);flex-shrink:0;}
         .logo span{color:var(--acid);text-shadow:0 0 20px var(--acid-glow);}
         .logo:hover{color:var(--acid);}
+
+        /* Desktop nav */
         .nav-links{display:flex;align-items:stretch;margin-left:10px;}
-        .nav-links a{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:0.82rem;letter-spacing:2px;text-transform:uppercase;color:var(--gray);text-decoration:none;padding:0 18px;display:flex;align-items:center;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all 0.2s;}
+        .nav-links a{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:0.82rem;letter-spacing:2px;text-transform:uppercase;color:var(--gray);text-decoration:none;padding:0 14px;display:flex;align-items:center;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all 0.2s;height:68px;}
         .nav-links a:hover,.nav-links a.active{color:var(--acid);border-bottom-color:var(--acid);}
-        .header-right{display:flex;align-items:center;gap:18px;margin-left:auto;}
+
+        .header-right{display:flex;align-items:center;gap:14px;margin-left:auto;}
         .search-bar{display:flex;background:var(--dark3);border:1.5px solid var(--gray2);border-radius:var(--radius-sm);overflow:hidden;transition:border-color 0.2s,box-shadow 0.2s;}
         .search-bar:focus-within{border-color:var(--acid);box-shadow:0 0 0 3px var(--acid-glow);}
-        .search-bar input{background:transparent;border:none;outline:none;color:var(--white);padding:8px 14px;width:200px;font-family:'Barlow',sans-serif;font-size:0.9rem;}
+        .search-bar input{background:transparent;border:none;outline:none;color:var(--white);padding:8px 14px;width:180px;font-family:'Barlow',sans-serif;font-size:0.9rem;}
         .search-bar input::placeholder{color:var(--gray);}
-        .search-bar button{background:var(--acid);color:var(--black);border:none;padding:0 16px;cursor:pointer;transition:background 0.2s;font-size:1rem;border-radius:0 var(--radius-sm) var(--radius-sm) 0;}
+        .search-bar button{background:var(--acid);color:var(--black);border:none;padding:0 14px;cursor:pointer;transition:background 0.2s;font-size:1rem;border-radius:0 var(--radius-sm) var(--radius-sm) 0;}
         .search-bar button:hover{background:var(--acid-dim);}
-        .cart-icon-btn{position:relative;color:var(--white);font-size:1.45rem;text-decoration:none;transition:color 0.2s;display:flex;align-items:center;}
+        .cart-icon-btn{position:relative;color:var(--white);font-size:1.45rem;text-decoration:none;transition:color 0.2s;display:flex;align-items:center;flex-shrink:0;}
         .cart-icon-btn:hover{color:var(--acid);}
         .cart-badge{position:absolute;top:-8px;right:-10px;background:var(--acid);color:var(--black);font-size:0.65rem;font-weight:900;padding:3px 6px;border-radius:20px;font-family:'Barlow Condensed',sans-serif;}
         .user-dropdown .dropdown-toggle::after{display:none;}
@@ -50,19 +53,49 @@
         .dropdown-item i{margin-right:10px;color:var(--acid);transition:color 0.2s;}
         .dropdown-item:hover i{color:var(--black);}
 
-        /* STATS BAR */
-        .stats-bar{width:100%;background:var(--dark2);border-bottom:1.5px solid var(--gray2);padding:0 40px;display:flex;align-items:stretch;position:sticky;top:68px;z-index:900;}
-        .stats-bar-items{display:flex;align-items:center;}
-        .stat-bar-item{display:flex;align-items:center;gap:10px;padding:10px 22px;border-right:1px solid var(--gray2);transition:background 0.2s;}
+        /* Burger button */
+        .burger-btn{display:none;background:none;border:1.5px solid var(--gray2);color:var(--white);width:40px;height:40px;border-radius:10px;align-items:center;justify-content:center;font-size:1.2rem;cursor:pointer;transition:all 0.2s;flex-shrink:0;}
+        .burger-btn:hover{border-color:var(--acid);color:var(--acid);}
+
+        /* Mobile nav drawer */
+        .mobile-nav{display:none;position:fixed;inset:0;z-index:9998;pointer-events:none;}
+        .mobile-nav.open{pointer-events:all;}
+        .mobile-nav-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.7);opacity:0;transition:opacity 0.3s;}
+        .mobile-nav.open .mobile-nav-overlay{opacity:1;}
+        .mobile-nav-drawer{position:absolute;top:0;left:0;width:280px;height:100%;background:var(--dark2);border-right:1.5px solid rgba(174,221,0,0.2);transform:translateX(-100%);transition:transform 0.3s cubic-bezier(0.4,0,0.2,1);display:flex;flex-direction:column;padding:0;}
+        .mobile-nav.open .mobile-nav-drawer{transform:translateX(0);}
+        .mobile-nav-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--gray2);}
+        .mobile-nav-logo{font-family:'Anton',sans-serif;font-size:1.4rem;letter-spacing:3px;color:var(--white);text-decoration:none;}
+        .mobile-nav-logo span{color:var(--acid);}
+        .mobile-nav-close{background:none;border:none;color:var(--gray);font-size:1.4rem;cursor:pointer;padding:4px;}
+        .mobile-nav-close:hover{color:var(--acid);}
+        .mobile-nav-links{padding:16px 0;flex:1;overflow-y:auto;}
+        .mobile-nav-links a{display:flex;align-items:center;gap:12px;padding:14px 24px;color:var(--gray);text-decoration:none;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1rem;letter-spacing:2px;text-transform:uppercase;transition:all 0.2s;border-left:3px solid transparent;}
+        .mobile-nav-links a:hover,.mobile-nav-links a.active{color:var(--acid);border-left-color:var(--acid);background:rgba(174,221,0,0.04);}
+        .mobile-nav-links a i{font-size:1.1rem;width:20px;text-align:center;}
+        .mobile-nav-bottom{padding:16px 20px;border-top:1px solid var(--gray2);}
+        .mobile-search{display:flex;background:var(--dark3);border:1.5px solid var(--gray2);border-radius:var(--radius-sm);overflow:hidden;margin-bottom:12px;}
+        .mobile-search input{background:transparent;border:none;outline:none;color:var(--white);padding:10px 14px;flex:1;font-family:'Barlow',sans-serif;font-size:0.9rem;}
+        .mobile-search input::placeholder{color:var(--gray);}
+        .mobile-search button{background:var(--acid);color:var(--black);border:none;padding:0 14px;cursor:pointer;font-size:1rem;}
+        .mobile-nav-actions{display:flex;gap:10px;}
+        .mobile-nav-action-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:10px;background:var(--dark3);border:1.5px solid var(--gray2);border-radius:var(--radius-sm);color:var(--acid);font-family:'Anton',sans-serif;font-size:0.7rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:all 0.2s;text-decoration:none;}
+        .mobile-nav-action-btn:hover{border-color:var(--acid);background:rgba(174,221,0,0.08);color:var(--acid);}
+
+        /* ========== STATS BAR ========== */
+        .stats-bar{width:100%;background:var(--dark2);border-bottom:1.5px solid var(--gray2);padding:0 40px;display:flex;align-items:center;position:sticky;top:68px;z-index:900;overflow-x:auto;}
+        .stats-bar::-webkit-scrollbar{height:0;}
+        .stats-bar-items{display:flex;align-items:center;flex-shrink:0;}
+        .stat-bar-item{display:flex;align-items:center;gap:10px;padding:10px 18px;border-right:1px solid var(--gray2);transition:background 0.2s;flex-shrink:0;}
         .stat-bar-item:first-child{padding-left:0;}
         .stat-bar-item:hover{background:rgba(174,221,0,0.04);}
         .stat-bar-icon{width:30px;height:30px;border-radius:8px;background:rgba(174,221,0,0.1);display:flex;align-items:center;justify-content:center;color:var(--acid);font-size:0.85rem;flex-shrink:0;}
         .stat-bar-num{font-family:'Anton',sans-serif;font-size:1.2rem;letter-spacing:2px;color:var(--acid);line-height:1;}
         .stat-bar-label{font-family:'Barlow Condensed',sans-serif;font-size:0.65rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--gray);margin-top:1px;}
-        .stats-bar-actions{display:flex;align-items:center;gap:8px;margin-left:auto;padding:8px 0;}
+        .stats-bar-actions{display:flex;align-items:center;gap:8px;margin-left:auto;padding:8px 0;flex-shrink:0;}
         .stats-bar-btn{display:flex;align-items:center;gap:6px;padding:7px 14px;background:var(--dark3);border:1.5px solid var(--gray2);border-radius:var(--radius-sm);color:var(--acid);font-family:'Anton',sans-serif;font-size:0.75rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:all 0.2s;white-space:nowrap;}
         .stats-bar-btn:hover{background:rgba(174,221,0,0.08);border-color:var(--acid);transform:translateY(-1px);}
-        .stats-bar-promo{display:flex;align-items:center;gap:12px;padding:6px 16px;margin-left:16px;background:linear-gradient(135deg,rgba(174,221,0,0.08),rgba(174,221,0,0.03));border:1.5px solid rgba(174,221,0,0.4);border-radius:var(--radius-sm);cursor:pointer;transition:all 0.2s;align-self:center;}
+        .stats-bar-promo{display:flex;align-items:center;gap:12px;padding:6px 16px;margin-left:16px;background:linear-gradient(135deg,rgba(174,221,0,0.08),rgba(174,221,0,0.03));border:1.5px solid rgba(174,221,0,0.4);border-radius:var(--radius-sm);cursor:pointer;transition:all 0.2s;align-self:center;flex-shrink:0;}
         .stats-bar-promo:hover{background:rgba(174,221,0,0.14);}
         .promo-discount{font-family:'Anton',sans-serif;font-size:1.4rem;color:var(--acid);letter-spacing:2px;line-height:1;}
         .promo-text-block{display:flex;flex-direction:column;}
@@ -71,12 +104,12 @@
         .promo-btn{background:var(--acid);color:var(--black);border:none;padding:6px 12px;border-radius:8px;font-family:'Anton',sans-serif;font-size:0.72rem;letter-spacing:1.5px;cursor:pointer;transition:background 0.2s;white-space:nowrap;}
         .promo-btn:hover{background:#fff;}
 
-        /* LAYOUT */
+        /* ========== LAYOUT ========== */
         .container-main{width:100%;position:relative;z-index:1;flex:1;}
         main{padding:40px;min-width:0;}
 
-        /* HERO */
-        .main-hero{margin-bottom:56px;position:relative;padding:45px 50px 70px;border-radius:var(--radius-lg);overflow:hidden;min-height:380px;display:flex;flex-direction:column;justify-content:center;}
+        /* ========== HERO ========== */
+        .main-hero{margin-bottom:32px;position:relative;padding:45px 50px 70px;border-radius:var(--radius-lg);overflow:hidden;min-height:380px;display:flex;flex-direction:column;justify-content:center;}
         .hero-bg{position:absolute;inset:0;background-image:url('https://images.unsplash.com/photo-1544191696-15693072e0b3?w=1400&q=80');background-size:cover;background-position:center 40%;filter:brightness(0.50) saturate(1.4);transition:transform 8s ease;z-index:0;}
         .main-hero:hover .hero-bg{transform:scale(1.04);}
         .hero-overlay{position:absolute;inset:0;background:linear-gradient(135deg,rgba(5,5,5,0.9) 0%,rgba(5,5,5,0.45) 55%,transparent 100%);z-index:1;}
@@ -86,16 +119,15 @@
         .main-title{font-family:'Russo One',sans-serif;font-size:3.8rem;letter-spacing:3px;color:var(--white);margin-bottom:10px;line-height:1;text-transform:uppercase;text-shadow:0 4px 40px rgba(0,0,0,0.8);}
         .main-title span{color:var(--acid);text-shadow:0 0 40px rgba(174,221,0,0.55);}
         .main-subtitle{color:rgba(255,255,255,0.65);font-size:1rem;font-weight:500;letter-spacing:3px;text-transform:uppercase;margin-top:8px;}
-        .hero-stats{display:flex;gap:40px;margin-top:36px;}
+        .hero-stats{display:flex;gap:40px;margin-top:36px;flex-wrap:wrap;}
         .hero-stat-num{font-family:'Anton',sans-serif;font-size:2.2rem;letter-spacing:2px;color:var(--acid);line-height:1;}
         .hero-stat-label{font-size:0.7rem;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.45);margin-top:4px;}
 
         h2.section-title{font-family:'Anton',sans-serif;font-size:2rem;letter-spacing:4px;color:var(--white);margin-bottom:20px;text-transform:uppercase;display:flex;align-items:center;gap:14px;}
         h2.section-title::before{content:'';display:block;width:5px;height:28px;background:linear-gradient(180deg,var(--acid),var(--neon-orange));border-radius:3px;}
 
-        /* SPORTS GRID - 3 cols, 2 rows */
+        /* ========== SPORTS GRID ========== */
         .sports-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:40px;}
-        .main-hero{margin-bottom:32px;}
         .sport-card{background:var(--dark2);color:var(--white);padding:18px 16px;cursor:pointer;transition:all 0.25s ease;text-decoration:none;display:flex;align-items:center;gap:14px;position:relative;overflow:hidden;border-radius:var(--radius);border:1.5px solid var(--gray2);}
         .sport-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(174,221,0,0.07),transparent);opacity:0;transition:opacity 0.3s;border-radius:var(--radius);}
         .sport-card:hover::before,.sport-card.active::before{opacity:1;}
@@ -110,7 +142,7 @@
         .sport-arrow{color:var(--gray2);font-size:1rem;transition:all 0.2s;}
         .sport-card:hover .sport-arrow{color:var(--acid);transform:translateX(4px);}
 
-        /* GEAR GRID */
+        /* ========== GEAR GRID ========== */
         .gear-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;}
         .gear-card{background:var(--dark2);cursor:pointer;transition:all 0.25s ease;display:flex;flex-direction:column;text-decoration:none;color:var(--white);position:relative;overflow:hidden;border-radius:var(--radius);border:1.5px solid var(--gray2);animation:fadeUp 0.4s ease both;}
         .gear-card:hover{border-color:var(--acid);transform:translateY(-4px);color:var(--white);box-shadow:0 12px 36px rgba(174,221,0,0.12),0 4px 16px rgba(0,0,0,0.4);}
@@ -129,7 +161,7 @@
         .empty-state i{font-size:3rem;color:var(--gray2);}
         .empty-state h3{font-family:'Anton',sans-serif;font-size:1.8rem;letter-spacing:3px;margin-top:16px;}
 
-        /* FOOTER */
+        /* ========== FOOTER ========== */
         footer{background:var(--dark2);border-top:2px solid rgba(174,221,0,0.2);padding:50px 0 30px;margin-top:auto;}
         .footer-logo{font-family:'Anton',sans-serif;font-size:1.8rem;letter-spacing:4px;color:var(--white);margin-bottom:12px;}
         .footer-logo span{color:var(--acid);}
@@ -142,7 +174,7 @@
         .social-btn:hover{background:var(--white);transform:translateY(-3px);}
         .footer-copy{color:var(--gray2);font-size:0.8rem;margin-top:8px;}
 
-        /* MODALS */
+        /* ========== MODALS ========== */
         .modal-content{background:var(--dark2);border:1.5px solid rgba(174,221,0,0.3);border-radius:var(--radius-lg);color:var(--white);box-shadow:0 20px 60px rgba(0,0,0,0.7);}
         .modal-header{background:var(--dark3);border-bottom:1.5px solid rgba(174,221,0,0.15);padding:20px 24px;border-radius:var(--radius-lg) var(--radius-lg) 0 0;}
         .modal-title{font-family:'Anton',sans-serif;font-size:1.4rem;letter-spacing:3px;color:var(--acid);}
@@ -167,26 +199,40 @@
         .gear-card:nth-child(5){animation-delay:0.25s;} .gear-card:nth-child(6){animation-delay:0.30s;}
         @keyframes discountIn{from{transform:scale(0.8);opacity:0;}to{transform:scale(1);opacity:1;}}
 
-        @media(max-width:1280px){.stats-bar-promo{display:none;}}
-        @media(max-width:992px){
-            .header-content{flex-wrap:wrap;height:auto;padding:12px 16px;gap:12px;}
-            .logo{border-right:none;padding-right:0;font-size:1.6rem;}
-            .nav-links a{padding:0 12px;font-size:0.78rem;}
-            .stats-bar{padding:0 16px;flex-wrap:wrap;gap:8px;top:auto;position:relative;}
-            .stats-bar-items{flex-wrap:wrap;}
-            .stat-bar-item{padding:8px 12px;}
-            .stats-bar-actions{flex-wrap:wrap;padding:8px 0;}
-            main{padding:24px 16px;}
-            .main-title{font-size:3.5rem;}
-            .sports-grid{grid-template-columns:repeat(2,1fr);}
+        /* ========== RESPONSIVE ========== */
+        @media(max-width:1280px){
+            .stats-bar-promo{display:none;}
         }
+
+        @media(max-width:900px){
+            .header-content{padding:0 16px;height:60px;}
+            .logo{font-size:1.5rem;letter-spacing:3px;padding-right:0;border-right:none;}
+            .nav-links{display:none;}
+            .search-bar{display:none;}
+            .burger-btn{display:flex;}
+            .mobile-nav{display:block;}
+            .stats-bar{padding:0 16px;top:60px;overflow-x:auto;}
+            .stats-bar-actions{display:none;}
+            main{padding:20px 16px;}
+            .main-hero{padding:28px 24px 44px;min-height:280px;}
+            .main-title{font-size:2.6rem;}
+            .hero-stats{gap:20px;}
+            .sports-grid{grid-template-columns:repeat(2,1fr);}
+            .gear-grid{grid-template-columns:repeat(2,1fr);gap:10px;}
+            h2.section-title{font-size:1.6rem;letter-spacing:3px;}
+        }
+
         @media(max-width:576px){
-            .main-title{font-size:2.5rem;}
-            .search-bar input{width:130px;}
+            .main-title{font-size:2rem;letter-spacing:2px;}
+            .main-subtitle{font-size:0.82rem;letter-spacing:2px;}
             .sports-grid{grid-template-columns:1fr;}
             .gear-grid{grid-template-columns:1fr;}
-            .hero-stats{gap:24px;}
-            .stats-bar-actions{display:none;}
+            .hero-stats{gap:16px;}
+            .hero-stat-num{font-size:1.6rem;}
+            .stat-bar-item{padding:8px 10px;}
+            .stat-bar-num{font-size:1rem;}
+            .gear-image-box{height:180px;}
+            footer .row > div{margin-bottom:16px;}
         }
     </style>
 </head>
@@ -198,9 +244,75 @@
   </video>
 </div>
 
+<!-- ========== MOBILE NAV DRAWER ========== -->
+<div class="mobile-nav" id="mobileNav">
+    <div class="mobile-nav-overlay" onclick="closeMobileNav()"></div>
+    <div class="mobile-nav-drawer">
+        <div class="mobile-nav-header">
+            <a class="mobile-nav-logo" href="{% url 'home' %}">EXTREME<span>GEAR</span></a>
+            <button class="mobile-nav-close" onclick="closeMobileNav()"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <div class="mobile-nav-links">
+            <a href="{% url 'home' %}" class="{% if request.path == '/' %}active{% endif %}">
+                <i class="bi bi-house-fill"></i> Головна
+            </a>
+            <a href="{% url 'home' %}#sports" onclick="closeMobileNav()">
+                <i class="bi bi-lightning-charge-fill"></i> Спорт
+            </a>
+            <a href="{% url 'home' %}#gear" onclick="closeMobileNav()" class="{% if request.path|slice:':6' == '/gear/' %}active{% endif %}">
+                <i class="bi bi-grid-fill"></i> Каталог
+            </a>
+            <a href="{% url 'news' %}" class="{% if '/news' in request.path %}active{% endif %}">
+                <i class="bi bi-newspaper"></i> Новини
+            </a>
+            <a href="{% url 'rental_list' %}" class="{% if '/rental' in request.path %}active{% endif %}">
+                <i class="bi bi-calendar-week-fill"></i> Оренда
+            </a>
+            <a href="{% url 'cart_detail' %}" class="{% if '/cart' in request.path %}active{% endif %}">
+                <i class="bi bi-bag-fill"></i> Кошик
+                {% if request.session.cart %}<span style="background:var(--acid);color:var(--black);padding:2px 8px;border-radius:10px;font-size:0.7rem;font-family:'Barlow Condensed',sans-serif;font-weight:900;margin-left:auto;">{{ request.session.cart|length }}</span>{% endif %}
+            </a>
+            {% if user.is_authenticated %}
+                {% if user.is_staff %}
+                <a href="{% url 'admin:index' %}">
+                    <i class="bi bi-shield-lock-fill"></i> Адмін-панель
+                </a>
+                {% endif %}
+                <a href="#" onclick="document.getElementById('mobileLogoutForm').submit();closeMobileNav();">
+                    <i class="bi bi-box-arrow-right"></i> Вийти
+                </a>
+                <form id="mobileLogoutForm" method="POST" action="{% url 'logout' %}" style="display:none;">{% csrf_token %}</form>
+            {% else %}
+                <a href="#" onclick="closeMobileNav();openLoginModal();">
+                    <i class="bi bi-box-arrow-in-right"></i> Увійти
+                </a>
+                <a href="#" onclick="closeMobileNav();openRegisterModal();">
+                    <i class="bi bi-person-plus-fill"></i> Реєстрація
+                </a>
+            {% endif %}
+        </div>
+        <div class="mobile-nav-bottom">
+            <form class="mobile-search" method="GET" action="{% url 'search_gear' %}">
+                <input type="text" name="q" placeholder="Пошук спорядження...">
+                <button type="submit"><i class="bi bi-search"></i></button>
+            </form>
+            <div class="mobile-nav-actions">
+                <a href="{% url 'gear_table' %}" class="mobile-nav-action-btn" onclick="closeMobileNav()">
+                    <i class="bi bi-calculator-fill"></i> Калькулятор
+                </a>
+                <button class="mobile-nav-action-btn" onclick="closeMobileNav();openAI();">
+                    <i class="bi bi-robot"></i> AI
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <header>
     <div class="header-content">
         <a class="logo" href="{% url 'home' %}">EXTREME<span>GEAR</span></a>
+
+        <!-- Desktop nav -->
         <nav class="nav-links" id="mainNav">
             <a href="{% url 'home' %}" id="nav-home" class="{% if request.path == '/' and not request.GET.sport_id %}active{% endif %}">Головна</a>
             <a href="{% url 'home' %}#sports" id="nav-sports" class="{% if request.path == '/' and request.GET.sport_id %}active{% endif %}" onclick="navScrollTo(event,'sports',this)">Спорт</a>
@@ -208,16 +320,22 @@
             <a href="{% url 'news' %}" id="nav-news" class="{% if '/news' in request.path %}active{% endif %}">Новини</a>
             <a href="{% url 'rental_list' %}" id="nav-rental" class="{% if '/rental' in request.path %}active{% endif %}">Оренда</a>
         </nav>
+
         <div class="header-right">
+            <!-- Desktop search -->
             <form class="search-bar" method="GET" action="{% url 'search_gear' %}">
                 <input type="text" name="q" placeholder="Знайти спорядження..." required>
                 <button type="submit"><i class="bi bi-search"></i></button>
             </form>
+
+            <!-- Cart -->
             <a href="{% url 'cart_detail' %}" class="cart-icon-btn" title="Кошик">
                 <i class="bi bi-bag-fill"></i>
                 {% if request.session.cart %}<span class="cart-badge">{{ request.session.cart|length }}</span>{% endif %}
             </a>
-            <div class="dropdown user-dropdown">
+
+            <!-- User dropdown (desktop) -->
+            <div class="dropdown user-dropdown d-none d-md-block">
                 <div class="dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                     {% if user.is_authenticated %}<i class="bi bi-person-fill-check" style="color:var(--acid);"></i>
                     {% else %}<i class="bi bi-person-circle"></i>{% endif %}
@@ -232,11 +350,16 @@
                     {% endif %}
                 </ul>
             </div>
+
+            <!-- Burger button (mobile) -->
+            <button class="burger-btn" onclick="openMobileNav()" aria-label="Меню">
+                <i class="bi bi-list"></i>
+            </button>
         </div>
     </div>
 </header>
 
-<!-- ГОРИЗОНТАЛЬНА ПАНЕЛЬ СТАТИСТИКИ -->
+<!-- STATS BAR -->
 <div class="stats-bar">
     <div class="stats-bar-items">
         <div class="stat-bar-item">
@@ -259,12 +382,7 @@
     <div class="stats-bar-actions">
         <button class="stats-bar-btn" onclick="window.location.href='{% url 'gear_table' %}'"><i class="bi bi-calculator-fill"></i> Калькулятор PRO</button>
         <button class="stats-bar-btn" onclick="openAI()"><i class="bi bi-robot"></i> AI Асистент</button>
-
     </div>
-    <div class="stats-bar-promo" onclick="openDiscountModal()">
-        <div class="promo-discount">-20%</div>
-        <div class="promo-text-block"><span class="promo-label">Тільки зараз</span><span class="promo-sub">На все спорядження</span></div>
-        <button class="promo-btn">Отримати знижку</button>
     </div>
 </div>
 
@@ -314,7 +432,7 @@
                         <div class="gear-brand">{{ gear.brand }}</div>
                         <div class="gear-name">{{ gear.name }}</div>
                         {% if gear.price %}<div class="gear-price">{{ gear.price }} &#x20B4;</div>{% endif %}
-                        <button class="btn-card">&#x414;&#x435;&#x442;&#x430;&#x43B;&#x456; &#x2192;</button>
+                        <button class="btn-card">Деталі →</button>
                     </div>
                 </a>
                 {% endfor %}
@@ -322,9 +440,9 @@
             {% else %}
             <div class="empty-state">
                 <i class="bi bi-inbox-fill"></i>
-                <h3>&#x412;&#x456;&#x442;&#x440;&#x438;&#x43D;&#x430; &#x43F;&#x43E;&#x440;&#x43E;&#x436;&#x43D;&#x44F;</h3>
-                <p style="color:var(--gray);margin-top:8px;">&#x414;&#x43B;&#x44F; &#x446;&#x44C;&#x43E;&#x433;&#x43E; &#x43D;&#x430;&#x43F;&#x440;&#x44F;&#x43C;&#x43A;&#x443; &#x43D;&#x430;&#x440;&#x430;&#x437;&#x456; &#x43D;&#x435;&#x43C;&#x430;&#x454; &#x434;&#x43E;&#x441;&#x442;&#x443;&#x43F;&#x43D;&#x438;&#x445; &#x442;&#x43E;&#x432;&#x430;&#x440;&#x456;&#x432;.</p>
-                <a href="{% url 'home' %}" style="display:inline-block;margin-top:20px;background:var(--acid);color:var(--black);padding:10px 24px;font-family:'Anton',sans-serif;letter-spacing:2px;text-decoration:none;border-radius:var(--radius-sm);">&#x41F;&#x43E;&#x43A;&#x430;&#x437;&#x430;&#x442;&#x438; &#x432;&#x441;&#x435;</a>
+                <h3>Вітрина порожня</h3>
+                <p style="color:var(--gray);margin-top:8px;">Для цього напрямку наразі немає доступних товарів.</p>
+                <a href="{% url 'home' %}" style="display:inline-block;margin-top:20px;background:var(--acid);color:var(--black);padding:10px 24px;font-family:'Anton',sans-serif;letter-spacing:2px;text-decoration:none;border-radius:var(--radius-sm);">Показати все</a>
             </div>
             {% endif %}
         </div>
@@ -348,16 +466,16 @@
         <div class="row gy-4">
             <div class="col-lg-4 col-md-6">
                 <div class="footer-logo">EXTREME<span>GEAR</span></div>
-                <p class="footer-text">&#x412;&#x430;&#x448; &#x43D;&#x430;&#x434;&#x456;&#x439;&#x43D;&#x438;&#x439; &#x43F;&#x430;&#x440;&#x442;&#x43D;&#x435;&#x440; &#x443; &#x432;&#x438;&#x431;&#x43E;&#x440;&#x456; &#x43F;&#x440;&#x43E;&#x444;&#x435;&#x441;&#x456;&#x439;&#x43D;&#x43E;&#x433;&#x43E; &#x435;&#x43A;&#x456;&#x43F;&#x456;&#x440;&#x443;&#x432;&#x430;&#x43D;&#x43D;&#x44F;.</p>
+                <p class="footer-text">Ваш надійний партнер у виборі професійного екіпірування.</p>
                 <p class="footer-copy">&copy; 2026</p>
             </div>
             <div class="col-lg-4 col-md-6">
-                <div class="footer-heading">&#x41A;&#x43E;&#x43D;&#x442;&#x430;&#x43A;&#x442;&#x438;</div>
+                <div class="footer-heading">Контакти</div>
                 <a href="tel:+380971234567" class="footer-contact-link"><i class="bi bi-telephone-fill"></i> +38 (097) 123-45-67</a>
                 <a href="mailto:support@extremegear.ua" class="footer-contact-link"><i class="bi bi-envelope-at-fill"></i> support@extremegear.ua</a>
             </div>
             <div class="col-lg-4 col-md-12">
-                <div class="footer-heading">&#x41C;&#x438; &#x432; &#x43C;&#x435;&#x440;&#x435;&#x436;&#x456;</div>
+                <div class="footer-heading">Ми в мережі</div>
                 <a href="https://www.facebook.com/profile.php?id=100093056911079" class="social-btn"><i class="fab fa-facebook-f"></i></a>
                 <a href="https://t.me/chasomaniya" class="social-btn"><i class="fab fa-telegram-plane"></i></a>
                 <a href="https://www.instagram.com/muha_olecsiy/" class="social-btn"><i class="fab fa-instagram"></i></a>
@@ -369,11 +487,11 @@
 <!-- LOGIN MODAL -->
 <div class="modal fade" id="loginModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-md"><div class="modal-content">
-        <div class="modal-header"><h5 class="modal-title"><i class="bi bi-shield-lock-fill me-2"></i> &#x412;&#x445;&#x456;&#x434; &#x434;&#x43B;&#x44F; &#x430;&#x434;&#x43C;&#x456;&#x43D;&#x430;</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+        <div class="modal-header"><h5 class="modal-title"><i class="bi bi-shield-lock-fill me-2"></i> Вхід для адміна</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
         <div class="modal-body"><form method="POST" action="{% url 'login' %}">{% csrf_token %}
-            <div class="mb-4"><label class="form-label">&#x41B;&#x43E;&#x433;&#x456;&#x43D;</label><div class="input-group"><span class="input-group-text"><i class="bi bi-person"></i></span><input type="text" name="username" class="form-control" placeholder="&#x412;&#x432;&#x435;&#x434;&#x456;&#x442;&#x44C; &#x43B;&#x43E;&#x433;&#x456;&#x43D;" required></div></div>
-            <div class="mb-4"><label class="form-label">&#x41F;&#x430;&#x440;&#x43E;&#x43B;&#x44C;</label><div class="input-group"><span class="input-group-text"><i class="bi bi-key"></i></span><input type="password" name="password" class="form-control" placeholder="&#x412;&#x432;&#x435;&#x434;&#x456;&#x442;&#x44C; &#x43F;&#x430;&#x440;&#x43E;&#x43B;&#x44C;" required></div></div>
-            <button type="submit" class="btn-modal-submit">&#x423;&#x432;&#x456;&#x439;&#x442;&#x438; &#x432; &#x441;&#x438;&#x441;&#x442;&#x435;&#x43C;&#x443;</button>
+            <div class="mb-4"><label class="form-label">Логін</label><div class="input-group"><span class="input-group-text"><i class="bi bi-person"></i></span><input type="text" name="username" class="form-control" placeholder="Введіть логін" required></div></div>
+            <div class="mb-4"><label class="form-label">Пароль</label><div class="input-group"><span class="input-group-text"><i class="bi bi-key"></i></span><input type="password" name="password" class="form-control" placeholder="Введіть пароль" required></div></div>
+            <button type="submit" class="btn-modal-submit">Увійти в систему</button>
         </form></div>
     </div></div>
 </div>
@@ -381,13 +499,13 @@
 <!-- REGISTER MODAL -->
 <div class="modal fade" id="registerModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-md"><div class="modal-content">
-        <div class="modal-header"><h5 class="modal-title"><i class="bi bi-person-plus-fill me-2"></i> &#x421;&#x442;&#x432;&#x43E;&#x440;&#x438;&#x442;&#x438; &#x430;&#x43A;&#x430;&#x443;&#x43D;&#x442;</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+        <div class="modal-header"><h5 class="modal-title"><i class="bi bi-person-plus-fill me-2"></i> Створити акаунт</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
         <div class="modal-body"><form method="POST" action="{% url 'register' %}" id="registerForm">{% csrf_token %}
-            <div class="mb-3"><label class="form-label">&#x41B;&#x43E;&#x433;&#x456;&#x43D;</label><div class="input-group"><span class="input-group-text"><i class="bi bi-person"></i></span><input type="text" name="username" class="form-control" required></div></div>
+            <div class="mb-3"><label class="form-label">Логін</label><div class="input-group"><span class="input-group-text"><i class="bi bi-person"></i></span><input type="text" name="username" class="form-control" required></div></div>
             <div class="mb-3"><label class="form-label">E-Mail</label><div class="input-group"><span class="input-group-text"><i class="bi bi-envelope"></i></span><input type="email" name="email" class="form-control" required></div></div>
-            <div class="mb-3"><label class="form-label">&#x41F;&#x430;&#x440;&#x43E;&#x43B;&#x44C;</label><div class="input-group"><span class="input-group-text"><i class="bi bi-key"></i></span><input type="password" id="regPassword" name="password" class="form-control" required oninput="checkStrength()"></div><span id="password-strength-text"></span></div>
-            <div class="mb-4"><label class="form-label">&#x41F;&#x456;&#x434;&#x442;&#x432;&#x435;&#x440;&#x434;&#x436;&#x435;&#x43D;&#x43D;&#x44F;</label><div class="input-group"><span class="input-group-text"><i class="bi bi-check-circle"></i></span><input type="password" name="password_confirm" class="form-control" required></div></div>
-            <button type="submit" class="btn-modal-submit">&#x417;&#x430;&#x440;&#x435;&#x454;&#x441;&#x442;&#x440;&#x443;&#x432;&#x430;&#x442;&#x438;&#x441;&#x44F;</button>
+            <div class="mb-3"><label class="form-label">Пароль</label><div class="input-group"><span class="input-group-text"><i class="bi bi-key"></i></span><input type="password" id="regPassword" name="password" class="form-control" required oninput="checkStrength()"></div><span id="password-strength-text"></span></div>
+            <div class="mb-4"><label class="form-label">Підтвердження</label><div class="input-group"><span class="input-group-text"><i class="bi bi-check-circle"></i></span><input type="password" name="password_confirm" class="form-control" required></div></div>
+            <button type="submit" class="btn-modal-submit">Зареєструватись</button>
         </form></div>
     </div></div>
 </div>
@@ -395,10 +513,10 @@
 <!-- AI MODAL -->
 <div class="modal fade" id="aiModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-lg"><div class="modal-content">
-    <div class="modal-header"><h5 class="modal-title"><i class="bi bi-robot me-2"></i> AI &#x410;&#x441;&#x438;&#x441;&#x442;&#x435;&#x43D;&#x442;</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+    <div class="modal-header"><h5 class="modal-title"><i class="bi bi-robot me-2"></i> AI Асистент</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
     <div class="modal-body">
-      <textarea id="aiPromptInput" class="form-control mb-4" rows="4" placeholder="&#x41E;&#x43F;&#x438;&#x448;&#x456;&#x442;&#x44C; &#x432;&#x430;&#x448;&#x435; &#x437;&#x430;&#x432;&#x434;&#x430;&#x43D;&#x43D;&#x44F;..."></textarea>
-      <button onclick="sendAiRequest()" class="btn-modal-submit"><i class="bi bi-send-fill me-2"></i> &#x41E;&#x442;&#x440;&#x438;&#x43C;&#x430;&#x442;&#x438; &#x440;&#x435;&#x43A;&#x43E;&#x43C;&#x435;&#x43D;&#x434;&#x430;&#x446;&#x456;&#x44E;</button>
+      <textarea id="aiPromptInput" class="form-control mb-4" rows="4" placeholder="Опишіть ваше завдання..."></textarea>
+      <button onclick="sendAiRequest()" class="btn-modal-submit"><i class="bi bi-send-fill me-2"></i> Отримати рекомендацію</button>
       <div id="aiResponseBox" class="mt-4 p-4" style="display:none;"><div id="aiResponseText"></div></div>
     </div>
   </div></div>
@@ -408,15 +526,15 @@
 <div id="discountModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(10px);z-index:9999;align-items:center;justify-content:center;padding:20px;">
   <div style="background:#131313;border:1.5px solid rgba(174,221,0,0.35);border-radius:20px;width:100%;max-width:420px;overflow:hidden;animation:discountIn 0.3s cubic-bezier(0.34,1.56,0.64,1);">
     <div style="background:linear-gradient(135deg,#0e0e0e,#1a1a08);padding:28px 28px 20px;text-align:center;">
-      <div style="font-family:'Anton',sans-serif;font-size:0.8rem;letter-spacing:3px;color:var(--acid);margin-bottom:6px;">&#x421;&#x41F;&#x415;&#x426;&#x406;&#x410;&#x41B;&#x42C;&#x41D;&#x410; &#x41F;&#x420;&#x41E;&#x41F;&#x41E;&#x417;&#x418;&#x426;&#x406;&#x42F;</div>
+      <div style="font-family:'Anton',sans-serif;font-size:0.8rem;letter-spacing:3px;color:var(--acid);margin-bottom:6px;">СПЕЦІАЛЬНА ПРОПОЗИЦІЯ</div>
       <div style="font-family:'Anton',sans-serif;font-size:2.4rem;color:#fff;">-20%</div>
-      <div style="font-family:'Barlow Condensed',sans-serif;font-size:0.9rem;color:rgba(255,255,255,0.6);margin-top:6px;">&#x41E;&#x442;&#x440;&#x438;&#x43C;&#x430;&#x439;&#x442;&#x435; &#x437;&#x43D;&#x438;&#x436;&#x43A;&#x443; &#x43F;&#x456;&#x441;&#x43B;&#x44F; &#x440;&#x435;&#x454;&#x441;&#x442;&#x440;&#x430;&#x446;&#x456;&#x457;</div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:0.9rem;color:rgba(255,255,255,0.6);margin-top:6px;">Отримайте знижку після реєстрації</div>
     </div>
     <div style="padding:28px;">
-      <p style="text-align:center;font-size:1rem;color:rgba(255,255,255,0.8);margin-bottom:24px;">&#x411;&#x430;&#x436;&#x430;&#x454;&#x442;&#x435; &#x43E;&#x442;&#x440;&#x438;&#x43C;&#x430;&#x442;&#x438; &#x437;&#x43D;&#x438;&#x436;&#x43A;&#x443; 20%?</p>
+      <p style="text-align:center;font-size:1rem;color:rgba(255,255,255,0.8);margin-bottom:24px;">Бажаєте отримати знижку 20%?</p>
       <div style="display:flex;gap:12px;">
-        <button onclick="goToRegister()" style="flex:1;background:var(--acid);color:var(--black);border:none;padding:12px;border-radius:10px;font-family:'Anton',sans-serif;letter-spacing:2px;cursor:pointer;">&#x422;&#x410;&#x41A;</button>
-        <button onclick="closeDiscountModal()" style="flex:1;background:transparent;color:var(--white);border:1.5px solid var(--gray2);padding:12px;border-radius:10px;font-family:'Anton',sans-serif;letter-spacing:2px;cursor:pointer;">&#x41D;&#x406;</button>
+        <button onclick="goToRegister()" style="flex:1;background:var(--acid);color:var(--black);border:none;padding:12px;border-radius:10px;font-family:'Anton',sans-serif;letter-spacing:2px;cursor:pointer;">ТАК</button>
+        <button onclick="closeDiscountModal()" style="flex:1;background:transparent;color:var(--white);border:1.5px solid var(--gray2);padding:12px;border-radius:10px;font-family:'Anton',sans-serif;letter-spacing:2px;cursor:pointer;">НІ</button>
       </div>
     </div>
   </div>
@@ -424,6 +542,20 @@
 
 <script>
     const IS_AUTHENTICATED = {% if user.is_authenticated %}true{% else %}false{% endif %};
+
+    // ===== MOBILE NAV =====
+    function openMobileNav(){
+        const nav = document.getElementById('mobileNav');
+        nav.classList.add('open');
+        document.body.style.overflow = 'hidden';
+    }
+    function closeMobileNav(){
+        const nav = document.getElementById('mobileNav');
+        nav.classList.remove('open');
+        document.body.style.overflow = '';
+    }
+
+    // ===== DESKTOP NAV SCROLL =====
     (function(){
         const isHomePage=window.location.pathname==="/";
         const navHome=document.getElementById("nav-home"),navSports=document.getElementById("nav-sports"),navGear=document.getElementById("nav-gear"),navNews=document.getElementById("nav-news");
@@ -451,6 +583,7 @@
             }
         }
     })();
+
     function openAI(){new bootstrap.Modal(document.getElementById("aiModal")).show();}
     function openLoginModal(){new bootstrap.Modal(document.getElementById("loginModal")).show();}
     function openRegisterModal(){new bootstrap.Modal(document.getElementById("registerModal")).show();}
@@ -458,24 +591,19 @@
     function closeDiscountModal(){const m=document.getElementById("discountModal");if(m)m.style.display="none";}
     function goToRegister(){
         closeDiscountModal();
-        if(IS_AUTHENTICATED){const g=document.getElementById("gear");if(g)g.scrollIntoView({behavior:"smoрвсрoth"});else window.location.href="{% url 'home' %}#gear";}
+        if(IS_AUTHENTICATED){const g=document.getElementById("gear");if(g)g.scrollIntoView({behavior:"smooth"});else window.location.href="{% url 'home' %}#gear";}
         else openRegisterModal();
     }
-    function focusSearch(){
-        const input=document.querySelector(".search-bar input");
-        window.scrollTo({top:0,behavior:"smooth"});
-        setTimeout(()=>input.focus(),300);
-        const bar=document.querySelector(".search-bar");
-        bar.style.borderColor="var(--acid)";setTimeout(()=>bar.style.borderColor="",1500);
-    }
+
     function checkStrength(){
         const password=document.getElementById("regPassword").value;
         const text=document.getElementById("password-strength-text");
         if(!password.length){text.innerHTML="";return;}
-        if(password.length<8){text.innerHTML="&#x274C; &#x41F;&#x430;&#x440;&#x43E;&#x43B;&#x44C; &#x437;&#x430;&#x43D;&#x430;&#x434;&#x442;&#x43E; &#x43A;&#x43E;&#x440;&#x43E;&#x442;&#x43A;&#x438;&#x439;!";text.className="text-weak";}
-        else if(!/\d/.test(password)){text.innerHTML="&#x26A0;&#xFE0F; &#x414;&#x43E;&#x434;&#x430;&#x439;&#x442;&#x435; &#x446;&#x438;&#x444;&#x440;&#x443;!";text.className="text-medium";}
-        else{text.innerHTML="&#x2705; &#x41D;&#x430;&#x434;&#x456;&#x439;&#x43D;&#x438;&#x439; &#x43F;&#x430;&#x440;&#x43E;&#x43B;&#x44C;!";text.className="text-strong";}
+        if(password.length<8){text.innerHTML="❌ Пароль занадто короткий!";text.className="text-weak";}
+        else if(!/\d/.test(password)){text.innerHTML="⚠️ Додайте цифру!";text.className="text-medium";}
+        else{text.innerHTML="✅ Надійний пароль!";text.className="text-strong";}
     }
+
     function animateCounters(){
         document.querySelectorAll(".stat-bar-num").forEach(el=>{
             const target=parseInt(el.dataset.target),duration=1500,startTime=performance.now();
@@ -483,36 +611,32 @@
             requestAnimationFrame(update);
         });
     }
-    window.addEventListener("load", function(){
-        var isReload = (
-            (window.performance && window.performance.navigation && window.performance.navigation.type === 1) ||
-            (window.performance && window.performance.getEntriesByType &&
-             window.performance.getEntriesByType("navigation")[0] &&
-             window.performance.getEntriesByType("navigation")[0].type === "reload")
-        );
-        var isFirstVisit = !sessionStorage.getItem("siteVisited");
 
-        if(isReload || isFirstVisit){
-            sessionStorage.setItem("siteVisited", "1");
+    window.addEventListener("load", function(){
+        var isReload=(
+            (window.performance&&window.performance.navigation&&window.performance.navigation.type===1)||
+            (window.performance&&window.performance.getEntriesByType&&
+             window.performance.getEntriesByType("navigation")[0]&&
+             window.performance.getEntriesByType("navigation")[0].type==="reload")
+        );
+        var isFirstVisit=!sessionStorage.getItem("siteVisited");
+        if(isReload||isFirstVisit){
+            sessionStorage.setItem("siteVisited","1");
             animateCounters();
-            setTimeout(function(){ openDiscountModal(); }, 5000);
         } else {
-            // Просто показуємо фінальні числа без анімації
-            document.querySelectorAll(".stat-bar-num").forEach(function(el){
-                el.textContent = el.dataset.target;
-            });
+            document.querySelectorAll(".stat-bar-num").forEach(function(el){el.textContent=el.dataset.target;});
         }
     });
+
     function sendAiRequest(){
         let txt=document.getElementById("aiPromptInput").value;if(!txt)return;
         let btn=document.querySelector("#aiModal .btn-modal-submit"),out=document.getElementById("aiResponseText");
         document.getElementById("aiResponseBox").style.display="block";
-        btn.innerHTML='<i class="bi bi-hourglass-split me-2"></i> &#x410;&#x43D;&#x430;&#x43B;&#x456;&#x437;&#x443;&#x44E;...';btn.disabled=true;
+        btn.innerHTML='<i class="bi bi-hourglass-split me-2"></i> Аналізую...';btn.disabled=true;
         fetch("/api/ai-chat/",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({prompt:txt})})
-        .then(r=>r.json()).then(data=>{out.innerHTML=data.content;btn.innerHTML='<i class="bi bi-send-fill me-2"></i> &#x41E;&#x442;&#x440;&#x438;&#x43C;&#x430;&#x442;&#x438; &#x440;&#x435;&#x43A;&#x43E;&#x43C;&#x435;&#x43D;&#x434;&#x430;&#x446;&#x456;&#x44E;';btn.disabled=false;})
-        .catch(()=>{out.innerHTML="&#x26A0;&#xFE0F; &#x41F;&#x43E;&#x43C;&#x438;&#x43B;&#x43A;&#x430;.";btn.innerHTML='<i class="bi bi-send-fill me-2"></i> &#x41E;&#x442;&#x440;&#x438;&#x43C;&#x430;&#x442;&#x438; &#x440;&#x435;&#x43A;&#x43E;&#x43C;&#x435;&#x43D;&#x434;&#x430;&#x446;&#x456;&#x44E;';btn.disabled=false;});
+        .then(r=>r.json()).then(data=>{out.innerHTML=data.content;btn.innerHTML='<i class="bi bi-send-fill me-2"></i> Отримати рекомендацію';btn.disabled=false;})
+        .catch(()=>{out.innerHTML="⚠️ Помилка.";btn.innerHTML='<i class="bi bi-send-fill me-2"></i> Отримати рекомендацію';btn.disabled=false;});
     }
 </script>
-
 </body>
 </html>

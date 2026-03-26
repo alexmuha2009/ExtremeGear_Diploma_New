@@ -40,6 +40,24 @@
         background-image: url('https://images.unsplash.com/photo-1547447134-cd3f5c716030?w=900&q=80');
     }
 
+    .back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--gray);
+        text-decoration: none;
+        font-family: 'Barlow Condensed', sans-serif;
+        font-weight: 700;
+        font-size: 0.82rem;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        margin-bottom: 20px;
+        transition: color 0.2s;
+        padding: 8px 0;
+    }
+    .back-btn:hover { color: var(--acid); }
+    .back-btn i { font-size: 1rem; }
+
     .calc-card {
         position: relative; z-index: 2;
         width: 100%; max-width: 820px;
@@ -117,15 +135,12 @@
     .calc-select option { background: var(--dark2); color: var(--white); }
     .calc-input::placeholder { color: var(--gray); }
 
-    /* ===== ПРИБИРАЄМО СТРІЛКИ З NUMBER INPUT ===== */
     input[type=number]::-webkit-inner-spin-button,
     input[type=number]::-webkit-outer-spin-button {
         -webkit-appearance: none;
         margin: 0;
     }
-    input[type=number] {
-        -moz-appearance: textfield;
-    }
+    input[type=number] { -moz-appearance: textfield; }
 
     .temp-box {
         background: rgba(204,255,0,0.04);
@@ -182,9 +197,7 @@
         background: var(--white); transform: translateY(-2px);
         box-shadow: 0 8px 32px rgba(255,255,255,0.15);
     }
-    .btn-calculate:disabled {
-        opacity: 0.6; cursor: not-allowed; transform: none;
-    }
+    .btn-calculate:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 
     .result-box {
         display: none;
@@ -217,9 +230,7 @@
         font-family: 'Bebas Neue', sans-serif;
         font-size: 2.5rem; letter-spacing: 3px; color: var(--acid); line-height: 1;
     }
-    .result-stat-sub {
-        font-size: 0.82rem; color: rgba(255,255,255,0.5); margin-top: 6px;
-    }
+    .result-stat-sub { font-size: 0.82rem; color: rgba(255,255,255,0.5); margin-top: 6px; }
 
     .products-title {
         font-family: 'Bebas Neue', sans-serif;
@@ -282,8 +293,11 @@
     }
 </style>
 
-<!-- Фіксований фон -->
 <div class="page-bg-fixed"><div class="bg-tile"></div><div class="bg-tile"></div><div class="bg-tile"></div><div class="bg-tile"></div></div>
+
+<a href="javascript:history.back()" class="back-btn">
+    <i class="bi bi-arrow-left"></i> Назад
+</a>
 
 <div class="calc-wrapper">
     <div class="calc-card">
@@ -357,7 +371,6 @@
             </button>
         </div>
 
-        <!-- Результат -->
         <div id="resultBox" class="result-box">
             <div class="result-title">🎯 Ваш результат</div>
             <div class="result-stats" style="grid-template-columns: 1fr;">
@@ -406,27 +419,11 @@
         const w        = parseInt(weightEl.value);
 
         let hasError = false;
-
-        // Скидаємо всі помилки
         [sportEl, heightEl, weightEl].forEach(el => clearError(el));
 
-        // Перевірка виду спорту
-        if (!sport_id) {
-            setError(sportEl);
-            hasError = true;
-        }
-
-        // Перевірка росту — порожнє, 0 або більше 250
-        if (!heightEl.value || isNaN(h) || h <= 0 || h > 250) {
-            setError(heightEl);
-            hasError = true;
-        }
-
-        // Перевірка ваги — порожнє, 0 або більше 200
-        if (!weightEl.value || isNaN(w) || w <= 0 || w > 200) {
-            setError(weightEl);
-            hasError = true;
-        }
+        if (!sport_id) { setError(sportEl); hasError = true; }
+        if (!heightEl.value || isNaN(h) || h <= 0 || h > 250) { setError(heightEl); hasError = true; }
+        if (!weightEl.value || isNaN(w) || w <= 0 || w > 200) { setError(weightEl); hasError = true; }
 
         if (hasError) return;
 

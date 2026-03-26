@@ -1,12 +1,15 @@
 from pathlib import Path
+import os
+from decouple import config as env
+import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-)7!xjb1^+16g=vghbfhczs@s-$(6x-rij!yxsb5o97^fk@%27-'
+SECRET_KEY = env('SECRET_KEY')
 
-DEBUG = True
+DEBUG = env('DEBUG', default=False, cast=bool)
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['*.onrender.com', 'localhost', '127.0.0.1']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -20,6 +23,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # ← додано
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -48,10 +52,9 @@ TEMPLATES = [
 WSGI_APPLICATION = 'config.wsgi.application'
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': dj_database_url.config(
+        default=env('DATABASE_URL', default=f'sqlite:///{BASE_DIR / "db.sqlite3"}')
+    )
 }
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -73,7 +76,25 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-# ✅ Сесія зберігається 30 днів
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 SESSION_COOKIE_AGE = 60 * 60 * 24 * 30
 SESSION_SAVE_EVERY_REQUEST = True
+```
+
+**wsgi.py** — без змін, він вже правильний ✅
+
+---
+
+Тепер додай до `requirements.txt`:
+```
+gunicorn
+whitenoise
+python-decouple
+dj-database-url
+psycopg2-binary
+```
+
+І створи файл `.env` локально (щоб не зламати розробку):
+```
+SECRET_KEY=django-insecure-)7!xjb1^+16g=vghbfhczs@s-$(6x-rij!yxsb5o97^fk@%27-
+DEBUG=True
